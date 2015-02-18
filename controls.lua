@@ -7,13 +7,20 @@ local widget = require "widget"		-- include Corona's "widget" library
 ---------------------------------------------------------------------------------
 display.setDefault( "background", .25 )
 -- local forward references should go here
-local titleText1, backBtn
+
+--Variables
+local titleText1, btn1, backBtn
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
 
-
 local function onBackBtn()
 	composer.gotoScene( "menu", {effect="fromLeft", time=1000})
+
+	return true	-- indicates successful touch
+end
+
+local function onbtn1()
+	print("Testing TESTING")
 
 	return true	-- indicates successful touch
 end
@@ -28,6 +35,21 @@ function scene:create( event )
 	sceneGroup:insert(titleText1)
    
    -- Initialize the scene here.
+	btn1 = widget.newButton{
+		label="Button 1",
+		fontSize = contentWidth * .05,
+		labelColor = { default={255}, over={128} },
+		defaultFile="imgs/button.png",
+		overFile="imgs/button-over.png",
+		width=contentWidth * .50, height=contentHeight * .1,
+		onRelease = onbtn1
+	}
+	btn1.anchorX = .5
+	btn1.anchorY = .5
+	btn1.x = contentWidth * .50
+	btn1.y = contentHeight * .25
+	sceneGroup:insert(btn1)	
+
 	backBtn = widget.newButton{
 		label="Back",
 		fontSize = contentWidth * .05,
