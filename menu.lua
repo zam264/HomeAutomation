@@ -29,7 +29,7 @@ end
 function scene:create( event )
     sceneGroup = self.view	
 	
-	titleText1 = display.newText( "Home Automation", contentWidth * .5, contentHeight*.1, "fonts/Rufscript010" ,contentHeight * .065)
+	titleText1 = display.newText( "Home Automation", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
 	sceneGroup:insert(titleText1)
    
    -- Initialize the scene here.
