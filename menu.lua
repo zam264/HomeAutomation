@@ -64,6 +64,145 @@ function scene:create( event )
 	sceneGroup:insert(scheduleBtn)
 	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--  TAB/TOOLBAR -- IS NOT COMPLETE NEEDS MORE WORK *******************
+local widget = require( "widget" )
+
+-- Function to handle button events
+local function handleTabBarEvent( event )
+    print( event.target._id )  --reference to button's 'id' parameter
+end
+
+-- Configure the tab buttons to appear within the bar
+local tabButtons = {
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "power_tabbar.png",
+        overFile = "power_tabbar_over.png",
+        label = "Tab1",
+        id = "tab1",
+        selected = true,
+        size = 16,
+        labelYOffset = -8,
+        onPress = handleTabBarEvent
+    },
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "scheduler_tabbar.png",
+        overFile = "scheduler_tabbar_over.png",
+        label = "Tab2",
+        id = "tab2",
+        size = 16,
+        labelYOffset = -8,
+        onPress = handleTabBarEvent
+    },
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "settings_tabbar.png",
+        overFile = "settings_tabbar_over.png",
+        label = "Tab3",
+        id = "tab3",
+        size = 16,
+        labelYOffset = -8,
+        onPress = handleTabBarEvent
+    }
+}
+
+-- Create the widget
+local tabBar = widget.newTabBar
+{
+    left = 0,
+    top = display.contentHeight-120,
+    width = 580,
+    height = 120,
+    backgroundFile = "tabBarBackground.png",
+    tabSelectedLeftFile = "tabBarBackground.png",
+    tabSelectedRightFile = "tabBarBackground.png",
+    tabSelectedMiddleFile = "tabBarBackground.png",
+    tabSelectedFrameWidth = 40,
+    tabSelectedFrameHeight = 120,
+    buttons = tabButtons
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 end
 
 -- "scene:show()"

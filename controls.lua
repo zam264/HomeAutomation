@@ -15,7 +15,7 @@ local contentHeight = display.contentHeight
 
 local function networkListener(event)
 	if(event.isError) then
-		print("Netowrk Error")
+		print("Network Error")
 	else
 		print("Response: " .. event.response)
 	end
