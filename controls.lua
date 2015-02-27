@@ -12,6 +12,8 @@ display.setDefault( "background", .25 )
 local titleText1, btn0, btn1, backBtn
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
+local btnWidth = contentWidth * .45
+local btnHeight = contentHeight * .08
 
 local function networkListener(event)
 	if(event.isError) then
@@ -21,12 +23,22 @@ local function networkListener(event)
 	end
 end
 
-local function onBackBtn()
-	composer.gotoScene( "menu", {effect="fromLeft", time=1000})
+
+local function onControlsBtn()
+	composer.gotoScene( "controls", {effect="fade", time=200})
 
 	return true	-- indicates successful touch
 end
+local function onScheduleBtn()
+	composer.gotoScene( "schedule", {effect="fade", time=200})
 
+	return true	-- indicates successful touch
+end
+local function onOptionsBtn()
+	composer.gotoScene( "options", {effect="fade", time=200})
+
+	return true	-- indicates successful touch
+end
 local function togglePin(pin)
 	print("Pin: " .. pin .. " toggled")
 	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
@@ -50,12 +62,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(5) end
 	}
 	btn0.anchorX = .5
 	btn0.anchorY = .5
-	btn0.x = contentWidth * .50
+	btn0.x = contentWidth * .25
 	btn0.y = contentHeight * .20
 	sceneGroup:insert(btn0)	
 
@@ -65,12 +77,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(1) end
 	}
 	btn1.anchorX = .5
 	btn1.anchorY = .5
-	btn1.x = contentWidth * .50
+	btn1.x = contentWidth * .25
 	btn1.y = contentHeight * .30
 	sceneGroup:insert(btn1)	
 
@@ -80,12 +92,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(2) end
 	}
 	btn2.anchorX = .5
 	btn2.anchorY = .5
-	btn2.x = contentWidth * .50
+	btn2.x = contentWidth * .25
 	btn2.y = contentHeight * .40
 	sceneGroup:insert(btn2)
 
@@ -95,12 +107,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(3) end
 	}
 	btn3.anchorX = .5
 	btn3.anchorY = .5
-	btn3.x = contentWidth * .50
+	btn3.x = contentWidth * .25
 	btn3.y = contentHeight * .50
 	sceneGroup:insert(btn3)
 
@@ -110,12 +122,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(4) end
 	}
 	btn4.anchorX = .5
 	btn4.anchorY = .5
-	btn4.x = contentWidth * .50
+	btn4.x = contentWidth * .25
 	btn4.y = contentHeight * .60
 	sceneGroup:insert(btn4)			
 
@@ -125,12 +137,12 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(15) end
 	}
 	btn5.anchorX = .5
 	btn5.anchorY = .5
-	btn5.x = contentWidth * .50
+	btn5.x = contentWidth * .25
 	btn5.y = contentHeight * .70
 	sceneGroup:insert(btn5)
 
@@ -140,30 +152,71 @@ function scene:create( event )
 		labelColor = { default={255}, over={128} },
 		defaultFile="imgs/button.png",
 		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
+		width=btnWidth, height=btnHeight,
 		onRelease = function() return togglePin(16) end
 	}
 	btn6.anchorX = .5
 	btn6.anchorY = .5
-	btn6.x = contentWidth * .50
+	btn6.x = contentWidth * .25
 	btn6.y = contentHeight * .80
 	sceneGroup:insert(btn6)		
 
-	backBtn = widget.newButton{
-		label="Back",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=contentWidth * .50, height=contentHeight * .1,
-		onRelease = onBackBtn
-	}
-	backBtn.anchorX = .5
-	backBtn.anchorY = .5
-	backBtn.x = contentWidth * .5
-	backBtn.y = contentHeight * .90
-	sceneGroup:insert(backBtn)	
 	
+local tabButtons = {
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "imgs/power_tabbar.png",
+        overFile = "imgs/power_tabbar_over.png",
+        --label = "Tab1",
+        id = "tab1",
+        --selected = true,
+        size = 16,
+        labelYOffset = -8,
+        onPress = onControlsBtn--handleTabBarEvent
+    },
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "imgs/scheduler_tabbar.png",
+        overFile = "imgs/scheduler_tabbar_over.png",
+        --label = "Tab2",
+        id = "tab2",
+        size = 16,
+        labelYOffset = -8,
+        onPress = onScheduleBtn--handleTabBarEvent
+    },
+    {
+        width = 100, 
+        height = 100,
+        defaultFile = "imgs/settings_tabbar.png",
+        overFile = "imgs/settings_tabbar_over.png",
+        --label = "Tab3",
+        id = "tab3",
+        size = 16,
+        labelYOffset = -8,
+        onPress = onOptionsBtn
+    }
+}
+
+-- Create the widget
+local tabBar = widget.newTabBar
+{
+    left = 0,
+    top = display.contentHeight-120,
+    width = contentWidth,
+    height = 120,
+    backgroundFile = "imgs/tabBarBackground.png",
+    tabSelectedLeftFile = "imgs/tabBarBackground.png",
+    tabSelectedRightFile = "imgs/tabBarBackground.png",
+    tabSelectedMiddleFile = "imgs/tabBarBackground.png",
+    tabSelectedFrameWidth = 40,
+    tabSelectedFrameHeight = 120,
+    buttons = tabButtons
+}
+
+tabBar:setSelected(1)
+
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
 
@@ -182,7 +235,6 @@ function scene:show( event )
 		btn4.isVisible = true
 		btn5.isVisible = true
 		btn6.isVisible = true
-		backBtn.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
       -- Called when the scene is now on screen.
@@ -206,7 +258,6 @@ function scene:hide( event )
 		btn4.isVisible = false
 		btn5.isVisible = false
 		btn6.isVisible = false
-		backBtn.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -236,8 +287,6 @@ function scene:destroy( event )
 	btn5 = nil
 	btn6:removeSelf()
 	btn6 = nil
-	backBtn:removeSelf()
-	backBtn = nil
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.
    -- Example: remove display objects, save state, etc.
@@ -254,3 +303,4 @@ scene:addEventListener( "destroy", scene )
 ---------------------------------------------------------------------------------
 
 return scene
+

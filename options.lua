@@ -7,9 +7,10 @@ local widget = require "widget"		-- include Corona's "widget" library
 ---------------------------------------------------------------------------------
 display.setDefault( "background", .25 )
 -- local forward references should go here
-local titleText1
+local titleText1, controlsBtn, scheduleBtn
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
+
 
 
 
@@ -19,13 +20,16 @@ local contentHeight = display.contentHeight
 function scene:create( event )
     sceneGroup = self.view	
 	
-	titleText1 = display.newText( "Schedule", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+	titleText1 = display.newText( "Home Automation\n Settings", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
 	sceneGroup:insert(titleText1)
    
    -- Initialize the scene here.
 	
 	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
+
+
+
 end
 
 -- "scene:show()"
@@ -52,7 +56,6 @@ function scene:hide( event )
 
    if ( phase == "will" ) then
    		titleText1.isVisible = false
-
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -68,8 +71,6 @@ function scene:destroy( event )
 
 	titleText1:removeSelf()
 	titleText1 = nil
-
-
 	
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.

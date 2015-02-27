@@ -16,7 +16,7 @@ holding = {}
 inUse = {}
 
  
-composer.gotoScene( "menu" )
+composer.gotoScene( "controls" )
 
 --Codes the keys for back button functionality 
 local function onKeyEvent(event)
