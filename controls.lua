@@ -14,6 +14,7 @@ local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
 local btnWidth = contentWidth * .45
 local btnHeight = contentHeight * .08
+local allControlsGroup = display.newGroup()
 
 local function networkListener(event)
 	if(event.isError) then
@@ -47,119 +48,336 @@ end
 
 
 ---------------------------------------------------------------------------------
+local function getApplianceNameTextXCoordinate(theNameText)
+	local positionAdjustment = 40
+   return (theNameText.width / 2) + positionAdjustment
+  end
+
+  local function getApplianceNameTextHeight(theBackgroundOn)
+  	local heightCoefficient = 0.45
+  	return (theBackgroundOn.height * heightCoefficient)
+  end
+
+  local function getControlBackgroundXCoordinate()
+  	return (contentWidth / 2)
+  end
+
+  local function getControlBackgroundHeight()
+  	return (contentHeight / 8)
+  end
+
+  local function getControlGroupingYCoordinate(orderOnScreen)
+  	return (100 + (getControlBackgroundHeight() * orderOnScreen))
+  end
+
+  local function getApplianceNameFont()
+  	return "Helvetica Neue Thin"
+  end
+
+  local function getOnOffButtonHeight()
+  	return (contentHeight + contentWidth) * 0.04
+  end
+
+  local function getOnOffButtonWidth()
+  	-- return (contentHeight + contentWidth) * 0.05
+  	return getOnOffButtonHeight()
+  end
+
+  local function getOnOffButtonXCoordinate()
+  	return contentWidth * 0.75
+  end
+
+    local function getOnOffButtonYCoordinate()
+  	return -50
+  end
+
+  local function getTabBarHeight()
+  	return (contentHeight / 9) 
+  end
+
+ local function getTabBarLocation()
+  	return (contentHeight / 9) * 8
+  end
 
 -- "scene:create()"
 function scene:create( event )
 
 	sceneGroup = self.view	
-	titleText1 = display.newText( "Controls", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+	titleText1 = display.newText( "Controls", contentWidth * .5, contentHeight*.04, getApplianceNameFont() ,contentHeight * .065)
 	sceneGroup:insert(titleText1)
+	-- local allControlsGroup = display.newGroup()
    
-   -- Initialize the scene here.
-	btn0 = widget.newButton{
-		label="Light 1",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(5) end
-	}
-	btn0.anchorX = .5
-	btn0.anchorY = .5
-	btn0.x = contentWidth * .25
-	btn0.y = contentHeight * .20
-	sceneGroup:insert(btn0)	
 
-	btn1 = widget.newButton{
-		label="Light 2",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(1) end
+	-- Create the widget
+	local scrollView = widget.newScrollView
+	{
+		top = 0,
+		left = 0,
+		width = contentWidth,
+		scrollWidth = contentWidth,
+		height = contentHeight - 100,
+		scrollHeight = contentHeight - 100,
+		listener = scrollListener,
+		horizontalScrollDisabled = true,
+		-- isBounceEnabled = false
 	}
-	btn1.anchorX = .5
-	btn1.anchorY = .5
-	btn1.x = contentWidth * .25
-	btn1.y = contentHeight * .30
-	sceneGroup:insert(btn1)	
+	scrollView:insert( allControlsGroup )
 
-	btn2 = widget.newButton{
-		label="Light 3",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(2) end
-	}
-	btn2.anchorX = .5
-	btn2.anchorY = .5
-	btn2.x = contentWidth * .25
-	btn2.y = contentHeight * .40
-	sceneGroup:insert(btn2)
+	
+   	local lightGroupOne = display.newGroup()
+	   	lightGroupOne.x = 0
+	   	lightGroupOne.y = getControlGroupingYCoordinate(0)
+	   	sceneGroup:insert(lightGroupOne)
+	 	backgroundOne = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundOne.width = contentWidth
+	 	backgroundOne.height = getControlBackgroundHeight()
+	 	lightGroupOne:insert( backgroundOne )
 
-	btn3 = widget.newButton{
-		label="Light 4",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(3) end
-	}
-	btn3.anchorX = .5
-	btn3.anchorY = .5
-	btn3.x = contentWidth * .25
-	btn3.y = contentHeight * .50
-	sceneGroup:insert(btn3)
+	 	local lightNameOne = display.newText( "Light 000", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundOne) )
+	 	lightNameOne:setTextColor( 0, 0, 0, 255 )
+	 	lightNameOne.x = getApplianceNameTextXCoordinate(lightNameOne)
+	 	lightGroupOne:insert(lightNameOne)
 
-	btn4 = widget.newButton{
-		label="Cooling",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(4) end
-	}
-	btn4.anchorX = .5
-	btn4.anchorY = .5
-	btn4.x = contentWidth * .25
-	btn4.y = contentHeight * .60
-	sceneGroup:insert(btn4)			
 
-	btn5 = widget.newButton{
-		label="Heating",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(15) end
-	}
-	btn5.anchorX = .5
-	btn5.anchorY = .5
-	btn5.x = contentWidth * .25
-	btn5.y = contentHeight * .70
-	sceneGroup:insert(btn5)
+		btn0 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(5) end
+		}
+		btn0.anchorX = 0
+		btn0.anchorY = 0
+		btn0.x = getOnOffButtonXCoordinate()
+		btn0.y = getOnOffButtonYCoordinate()
+	lightGroupOne:insert(btn0)
+	allControlsGroup:insert(lightGroupOne)
+	
 
-	btn6 = widget.newButton{
-		label="Fan",
-		fontSize = contentWidth * .05,
-		labelColor = { default={255}, over={128} },
-		defaultFile="imgs/button.png",
-		overFile="imgs/button-over.png",
-		width=btnWidth, height=btnHeight,
-		onRelease = function() return togglePin(16) end
-	}
-	btn6.anchorX = .5
-	btn6.anchorY = .5
-	btn6.x = contentWidth * .25
-	btn6.y = contentHeight * .80
-	sceneGroup:insert(btn6)		
+
+
+
+   	local lightGroupTwo = display.newGroup()
+	   	lightGroupTwo.x = 0
+	   	lightGroupTwo.y = getControlGroupingYCoordinate(1)
+	   	sceneGroup:insert(lightGroupTwo)
+	 	backgroundTwo = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundTwo.width = contentWidth
+	 	backgroundTwo.height = getControlBackgroundHeight()
+	 	lightGroupTwo:insert( backgroundTwo )
+
+	 	local lightNameTwo = display.newText( "Light 001", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundTwo) )
+	 	lightNameTwo:setTextColor( 0, 0, 0, 255 )
+	 	lightNameTwo.x = getApplianceNameTextXCoordinate(lightNameTwo)
+	 	lightGroupTwo:insert(lightNameTwo)
+
+
+		btn1 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(1) end
+		}
+		btn1.anchorX = 0
+		btn1.anchorY = 0
+		btn1.x = getOnOffButtonXCoordinate()
+		btn1.y = getOnOffButtonYCoordinate()
+	lightGroupTwo:insert(btn1)
+	allControlsGroup:insert(lightGroupTwo)
+
+
+
+
+
+	local lightGroupThree = display.newGroup()
+	   	lightGroupThree.x = 0
+	   	lightGroupThree.y = getControlGroupingYCoordinate(2)
+	   	sceneGroup:insert(lightGroupThree)
+	 	backgroundThree = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundThree.width = contentWidth
+	 	backgroundThree.height = getControlBackgroundHeight()
+	 	lightGroupThree:insert( backgroundThree )
+
+	 	local lightNameThree = display.newText( "Light 010", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundThree) )
+	 	lightNameThree:setTextColor( 0, 0, 0, 255 )
+	 	lightNameThree.x = getApplianceNameTextXCoordinate(lightNameThree)
+	 	lightGroupThree:insert(lightNameThree)
+
+
+		btn2 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(2) end
+		}
+		btn2.anchorX = 0
+		btn2.anchorY = 0
+		btn2.x = getOnOffButtonXCoordinate()
+		btn2.y = getOnOffButtonYCoordinate()
+	lightGroupThree:insert(btn2)
+	allControlsGroup:insert(lightGroupThree)
+
+
+
+
+	
+	local lightGroupFour = display.newGroup()
+	   	lightGroupFour.x = 0
+	   	lightGroupFour.y = getControlGroupingYCoordinate(3)
+	   	sceneGroup:insert(lightGroupFour)
+	 	backgroundFour = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundFour.width = contentWidth
+	 	backgroundFour.height = getControlBackgroundHeight()
+	 	lightGroupFour:insert( backgroundFour )
+
+	 	local lightNameFour = display.newText( "Light 011", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundFour) )
+	 	lightNameFour:setTextColor( 0, 0, 0, 255 )
+	 	lightNameFour.x = getApplianceNameTextXCoordinate(lightNameFour)
+	 	lightGroupFour:insert(lightNameFour)
+
+
+		btn3 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(3) end
+		}
+		btn3.anchorX = 0
+		btn3.anchorY = 0
+		btn3.x = getOnOffButtonXCoordinate()
+		btn3.y = getOnOffButtonYCoordinate()
+	lightGroupFour:insert(btn3)
+	allControlsGroup:insert(lightGroupFour)
+
+
+
+
+
+	local lightGroupFive = display.newGroup()
+	   	lightGroupFive.x = 0
+	   	lightGroupFive.y = getControlGroupingYCoordinate(4)
+	   	sceneGroup:insert(lightGroupFive)
+	 	backgroundFive = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundFive.width = contentWidth
+	 	backgroundFive.height = getControlBackgroundHeight()
+	 	lightGroupFive:insert( backgroundFive )
+
+	 	local lightNameFive = display.newText( "Cooling", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundFive) )
+	 	lightNameFive:setTextColor( 0, 0, 0, 255 )
+	 	lightNameFive.x = getApplianceNameTextXCoordinate(lightNameFive)
+	 	lightGroupFive:insert(lightNameFive)
+
+
+		btn4 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(4) end
+		}
+		btn4.anchorX = 0
+		btn4.anchorY = 0
+		btn4.x = getOnOffButtonXCoordinate()
+		btn4.y = getOnOffButtonYCoordinate()
+	lightGroupFive:insert(btn4)	
+	allControlsGroup:insert(lightGroupFive)
+
+
+
+	local lightGroupSix = display.newGroup()
+	   	lightGroupSix.x = 0
+	   	lightGroupSix.y = getControlGroupingYCoordinate(5)
+	   	sceneGroup:insert(lightGroupSix)
+	 	backgroundSix = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundSix.width = contentWidth
+	 	backgroundSix.height = getControlBackgroundHeight()
+	 	lightGroupSix:insert( backgroundSix )
+
+	 	local lightNameSix = display.newText( "Heating", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundSix) )
+	 	lightNameSix:setTextColor( 0, 0, 0, 255 )
+	 	lightNameSix.x = getApplianceNameTextXCoordinate(lightNameSix)
+	 	lightGroupSix:insert(lightNameSix)
+
+
+		btn5 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(15) end
+		}
+		btn5.anchorX = 0
+		btn5.anchorY = 0
+		btn5.x = getOnOffButtonXCoordinate()
+		btn5.y = getOnOffButtonYCoordinate()
+	lightGroupSix:insert(btn5)
+	allControlsGroup:insert(lightGroupSix)
+
+
+
+
+
+
+
+	local lightGroupSeven = display.newGroup()
+	   	lightGroupSeven.x = 0
+	   	lightGroupSeven.y = getControlGroupingYCoordinate(6)
+	   	sceneGroup:insert(lightGroupSeven)
+	 	backgroundSeven = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+	 	-- backgroundOne:scale( contentWidth, (0.1))
+	 	backgroundSeven.width = contentWidth
+	 	backgroundSeven.height = getControlBackgroundHeight()
+	 	lightGroupSeven:insert( backgroundSeven )
+
+	 	local lightNameSeven = display.newText( "Fan", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundSeven) )
+	 	lightNameSeven:setTextColor( 0, 0, 0, 255 )
+	 	lightNameSeven.x = getApplianceNameTextXCoordinate(lightNameSeven)
+	 	lightGroupSeven:insert(lightNameSeven)
+
+
+		btn6 = widget.newButton{
+			-- label="Light 1",
+			-- fontSize = contentWidth * .05,
+			-- labelColor = { default={255}, over={128} },
+			defaultFile="imgs/pushButton.png",
+			overFile="imgs/pushButton-over.png",
+			width=getOnOffButtonWidth(),
+			height=getOnOffButtonHeight(),
+			onRelease = function() return togglePin(16) end
+		}
+		btn6.anchorX = 0
+		btn6.anchorY = 0
+		btn6.x = getOnOffButtonXCoordinate()
+		btn6.y = getOnOffButtonYCoordinate()
+	lightGroupSeven:insert(btn6)
+	allControlsGroup:insert(lightGroupSeven)	
 
 	
 local tabButtons = {
@@ -203,9 +421,9 @@ local tabButtons = {
 local tabBar = widget.newTabBar
 {
     left = 0,
-    top = display.contentHeight-120,
+    top = getTabBarLocation(),
     width = contentWidth,
-    height = 120,
+    height = getTabBarHeight(),
     backgroundFile = "imgs/tabBarBackground.png",
     tabSelectedLeftFile = "imgs/tabBarBackground.png",
     tabSelectedRightFile = "imgs/tabBarBackground.png",
@@ -227,14 +445,15 @@ function scene:show( event )
    local phase = event.phase
 
    if ( phase == "will" ) then
-		titleText1.isVisible = true
-		btn0.isVisible = true
-		btn1.isVisible = true
-		btn2.isVisible = true
-		btn3.isVisible = true
-		btn4.isVisible = true
-		btn5.isVisible = true
-		btn6.isVisible = true
+   	allControlsGroup.isVisible = true
+		-- titleText1.isVisible = true
+		-- btn0.isVisible = true
+		-- btn1.isVisible = true
+		-- btn2.isVisible = true
+		-- btn3.isVisible = true
+		-- btn4.isVisible = true
+		-- btn5.isVisible = true
+		-- btn6.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
       -- Called when the scene is now on screen.
@@ -250,14 +469,15 @@ function scene:hide( event )
    local phase = event.phase
 
    if ( phase == "will" ) then
-   		titleText1.isVisible = false
-   		btn0.isVisible = false
-		btn1.isVisible = false
-		btn2.isVisible = false
-		btn3.isVisible = false
-		btn4.isVisible = false
-		btn5.isVisible = false
-		btn6.isVisible = false
+   		allControlsGroup.isVisible = false
+   		-- titleText1.isVisible = false
+   		-- btn0.isVisible = false
+		-- btn1.isVisible = false
+		-- btn2.isVisible = false
+		-- btn3.isVisible = false
+		-- btn4.isVisible = false
+		-- btn5.isVisible = false
+		-- btn6.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -270,23 +490,24 @@ end
 function scene:destroy( event )
 
    local sceneGroup = self.view
-
-	titleText1:removeSelf()
-	titleText1 = nil
-	btn0:removeSelf()
-	btn0 = nil
-	btn1:removeSelf()
-	btn1 = nil
-	btn2:removeSelf()
-	btn2 = nil
-	btn3:removeSelf()
-	btn3 = nil
-	btn4:removeSelf()
-	btn4 = nil
-	btn5:removeSelf()
-	btn5 = nil
-	btn6:removeSelf()
-	btn6 = nil
+   allControlsGroup:removeSelf()
+   -- allControlsGroup = nil
+	-- titleText1:removeSelf()
+	-- titleText1 = nil
+	-- btn0:removeSelf()
+	-- btn0 = nil
+	-- btn1:removeSelf()
+	-- btn1 = nil
+	-- btn2:removeSelf()
+	-- btn2 = nil
+	-- btn3:removeSelf()
+	-- btn3 = nil
+	-- btn4:removeSelf()
+	-- btn4 = nil
+	-- btn5:removeSelf()
+	-- btn5 = nil
+	-- btn6:removeSelf()
+	-- btn6 = nil
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.
    -- Example: remove display objects, save state, etc.
@@ -304,3 +525,4 @@ scene:addEventListener( "destroy", scene )
 
 return scene
 
+-- 

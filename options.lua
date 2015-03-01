@@ -20,7 +20,7 @@ local contentHeight = display.contentHeight
 function scene:create( event )
     sceneGroup = self.view	
 	
-	titleText1 = display.newText( "Home Automation\n Settings", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+	titleText1 = display.newText( "Settings", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
 	sceneGroup:insert(titleText1)
    
    -- Initialize the scene here.
