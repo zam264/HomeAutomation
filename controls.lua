@@ -24,7 +24,6 @@ local function networkListener(event)
 	end
 end
 
-
 local function onControlsBtn()
 	composer.gotoScene( "controls", {effect="fade", time=200})
 
@@ -45,8 +44,6 @@ local function togglePin(pin)
 	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
 	return true	-- indicates successful touch
 end
-
-
 ---------------------------------------------------------------------------------
 local function getApplianceNameTextXCoordinate(theNameText)
 	local positionAdjustment = 40
