@@ -119,6 +119,7 @@ function scene:create( event )
 		-- isBounceEnabled = false
 	}
 	scrollView:insert( allControlsGroup )
+	sceneGroup:insert(scrollView)
 
 	
    	local lightGroupOne = display.newGroup()
