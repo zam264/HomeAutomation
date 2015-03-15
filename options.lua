@@ -10,10 +10,9 @@ display.setDefault( "background", .25 )
 local titleText1, controlsBtn, scheduleBtn, passwordField
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
+local test = 0--debug
 
-passwordField = native.newTextField( contentWidth*.5, contentHeight*.1, contentWidth*.75, contentHeight*.1 )
 local function textListener( event )
-
     if ( event.phase == "began" ) then
         -- user begins editing defaultField
         print( event.text )
@@ -21,7 +20,9 @@ local function textListener( event )
     elseif ( event.phase == "ended" or event.phase == "submitted" ) then
         -- do something with defaultField text
         print( event.target.text )
-
+        test = test + 1--debug
+        titleText1.text = event.target.text--debug
+        --network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
     elseif ( event.phase == "editing" ) then
         print( event.newCharacters )
         print( event.oldText )
@@ -34,39 +35,44 @@ end
 
 -- "scene:create()"
 function scene:create( event )
-   sceneGroup = self.view	
-	titleText1 = display.newText( "Settings", contentWidth * .5, contentHeight*.5, native.systemFont ,contentHeight * .065)
-   sceneGroup:insert(titleText1)
+  sceneGroup = self.view	
+	--titleText1 = display.newText( "Settings", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+  titleText1 = display.newText( test, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+  sceneGroup:insert(titleText1)
+  passwordField = native.newTextField( contentWidth*.5, contentHeight*.25, contentWidth*.75, contentHeight*.1 )
+  sceneGroup:insert(passwordField)
    -- Initialize the scene here.	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
 
 -- "scene:show()"
 function scene:show( event )
-   local sceneGroup = self.view
-   local phase = event.phase
-   if ( phase == "will" ) then
-		titleText1.isVisible = true
+    local sceneGroup = self.view
+    local phase = event.phase
+    if ( phase == "will" ) then
+  	titleText1.isVisible = true
+    passwordField.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
-   elseif ( phase == "did" ) then
+    elseif ( phase == "did" ) then
       -- Called when the scene is now on screen.
       -- Insert code here to make the scene come alive.
       -- Example: start timers, begin animation, play audio, etc.
-   end
+    end
 end
 
 -- "scene:hide()"
 function scene:hide( event )
-   local sceneGroup = self.view
-   local phase = event.phase
-   if ( phase == "will" ) then
+    local sceneGroup = self.view
+    local phase = event.phase
+    if ( phase == "will" ) then
    		titleText1.isVisible = false
+      passwordField.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
-   elseif ( phase == "did" ) then
+    elseif ( phase == "did" ) then
       -- Called immediately after scene goes off screen.
-   end
+    end
 end
 
 -- "scene:destroy()"
@@ -74,6 +80,8 @@ function scene:destroy( event )
    local sceneGroup = self.view
 	titleText1:removeSelf()
 	titleText1 = nil
+  passwordField.removeSelf()
+  passwordField = nil
    if ( phase == "will" ) then
       titleText1.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
