@@ -16,11 +16,9 @@ local function textListener( event )
     if ( event.phase == "began" ) then
         -- user begins editing defaultField
         print( event.text )
-
     elseif ( event.phase == "ended" or event.phase == "submitted" ) then
         -- do something with defaultField text
         print( event.target.text )
-        test = test + 1--debug
         titleText1.text = event.target.text--debug
         --network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
     elseif ( event.phase == "editing" ) then
@@ -40,6 +38,7 @@ function scene:create( event )
   titleText1 = display.newText( test, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
   sceneGroup:insert(titleText1)
   passwordField = native.newTextField( contentWidth*.5, contentHeight*.25, contentWidth*.75, contentHeight*.1 )
+  passwordField:addEventListener( "userInput", textListener )
   sceneGroup:insert(passwordField)
    -- Initialize the scene here.	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
@@ -102,7 +101,6 @@ scene:addEventListener( "create", scene )
 scene:addEventListener( "show", scene )
 scene:addEventListener( "hide", scene )
 scene:addEventListener( "destroy", scene )
-scene:addEventListener( "userInput", textListener )
 
 ---------------------------------------------------------------------------------
 
