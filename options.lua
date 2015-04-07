@@ -7,12 +7,12 @@ local widget = require "widget"		-- include Corona's "widget" library
 ---------------------------------------------------------------------------------
 display.setDefault( "background", .25 )
 -- local forward references should go here
-local titleText1, controlsBtn, scheduleBtn, passwordField
+local titleText1, titleText2, controlsBtn, scheduleBtn, passwordField, ipField
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
-local test = 0--debug
+local test = "testText"--debug
 
-local function textListener( event )
+local function passwordFieldListener( event )
     if ( event.phase == "began" ) then
         -- user begins editing defaultField
         print( event.text )
@@ -29,17 +29,40 @@ local function textListener( event )
     end
 end
 
+local function ipFieldListener( event )
+    if ( event.phase == "began" ) then
+        -- user begins editing defaultField
+        print( event.text )
+    elseif ( event.phase == "ended" or event.phase == "submitted" ) then
+        -- do something with defaultField text
+        print( event.target.text )
+        titleText2.text = event.target.text--debug
+        --network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
+    elseif ( event.phase == "editing" ) then
+        print( event.newCharacters )
+        print( event.oldText )
+        print( event.startPosition )
+        print( event.text )
+    end
+end
+
 ---------------------------------------------------------------------------------
 
 -- "scene:create()"
 function scene:create( event )
   sceneGroup = self.view	
-	--titleText1 = display.newText( "Settings", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
-  titleText1 = display.newText( test, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+  titleText1 = display.newText( "passField", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
   sceneGroup:insert(titleText1)
-  passwordField = native.newTextField( contentWidth*.5, contentHeight*.25, contentWidth*.75, contentHeight*.1 )
-  passwordField:addEventListener( "userInput", textListener )
+  titleText2 = display.newText( "ipField", contentWidth * .5, contentHeight*.2, native.systemFont ,contentHeight * .065)
+  sceneGroup:insert(titleText2)
+  passwordField = native.newTextField( contentWidth*.5, contentHeight*.35, contentWidth*.75, contentHeight*.1 )
+  passwordField.text = "passwordField"
+  passwordField:addEventListener( "userInput", passwordFieldListener )
   sceneGroup:insert(passwordField)
+  ipField = native.newTextField( contentWidth*.5, contentHeight*.50, contentWidth*.75, contentHeight*.1 )
+  ipField.text = "ipField"
+  ipField:addEventListener( "userInput", ipFieldListener )
+  sceneGroup:insert(ipField)
    -- Initialize the scene here.	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
