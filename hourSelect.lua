@@ -1,49 +1,77 @@
 local composer = require( "composer" )
---local pinSelect = require ("pinSelect")
+local widget = require "widget"		-- include Corona's "widget" librarylocal composer = require( "composer" )
 local scene = composer.newScene()
-local widget = require "widget"		-- include Corona's "widget" library
+local schedule = require ("schedule")
 ---------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE
 -- unless "composer.removeScene()" is called.
 ---------------------------------------------------------------------------------
-display.setDefault( "background", .25 )
--- local forward references should go here
-local titleText1, addBtn
-scheduleString = "testString"
+local titleText
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
----------------------------------------------------------------------------------
+local horizontalOffset = contentWidth * .25
+local verticalOffset = contentHeight * .2
+local newVerticalOffset = contentHeight * .2
+local btnWidth = contentWidth * .2
+local btnHeight = contentWidth * .2
+local optionBtns = {}
+local options = {
+	"1",
+	"2",
+	"3",
+	"4",
+	"5",
+	"6",
+	"7",
+	"8",
+	"9",
+	"10",
+	"11",
+	"12"
+}
 
-local function onAddBtn()
+local function onOptionSelect(x)
    --titleText1.text = titleText1.text .. "1"
-   composer.gotoScene( "pinSelect", {effect="fade", time=200})
+   scheduleString = scheduleString .. options[x]
+   composer.gotoScene( "selectMinute", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end
+---------------------------------------------------------------------------------
 
 -- "scene:create()"
 function scene:create( event )
-   sceneGroup = self.view	
+	--composer.getScene("menu"):destroy()
+	local sceneGroup = self.view
+	titleText = display.newText( "Select a option", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
+	sceneGroup:insert(titleText)
 
-	titleText1 = display.newText( scheduleString, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
-	sceneGroup:insert(titleText1)
+	local i = 1
+	while i <= #options do
+		local x = i
+		optionBtns[i] = widget.newButton{
+			label=options[i],
+			fontSize = display.contentWidth * .05,
+			labelColor = { default={255}, over={128} },
+			defaultFile="imgs/button.png",
+			overFile="imgs/button_over.png",
+			width=btnWidth, height=btnHeight,
+			onRelease = function() return onOptionSelect(x) end
+   		}
+	    optionBtns[i].anchorX = .5
+		optionBtns[i].anchorY = .5
+		if (i % 3 == 0) then
+			optionBtns[i].y = newVerticalOffset 
+			optionBtns[i].x = horizontalOffset * 3
+			newVerticalOffset = newVerticalOffset + verticalOffset
+		else
+			optionBtns[i].y = newVerticalOffset
+			optionBtns[i].x = horizontalOffset * (i % 3)
+		end
+		sceneGroup:insert(optionBtns[i])
 
-   addBtn = widget.newButton{
-      label="Add Event",
-      fontSize = display.contentWidth * .05,
-      labelColor = { default={255}, over={128} },
-      defaultFile="imgs/button.png",
-      overFile="imgs/button_over.png",
-      width=display.contentWidth * .50, height=display.contentHeight * .1,
-      onRelease = onAddBtn
-   }
-   addBtn.anchorX = .5
-   addBtn.anchorY = .5
-   addBtn.x = display.contentWidth * .50
-   addBtn.y = display.contentHeight * .5
-   sceneGroup:insert(addBtn)
-   
-   -- Initialize the scene here.
-   -- Example: add display objects to "sceneGroup", add touch listeners, etc.
+		i = i + 1
+	end
+	-- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
 
 -- "scene:show()"
@@ -52,12 +80,8 @@ function scene:show( event )
    local sceneGroup = self.view
    local phase = event.phase
    if ( phase == "will" ) then
-		titleText1.isVisible = true
-      
-      addBtn.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
-      titleText1.text = scheduleString
       -- Called when the scene is now on screen.
       -- Insert code here to make the scene come alive.
       -- Example: start timers, begin animation, play audio, etc.
@@ -71,8 +95,6 @@ function scene:hide( event )
    local phase = event.phase
 
    if ( phase == "will" ) then
-   		titleText1.isVisible = false
-         addBtn.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -86,12 +108,6 @@ function scene:destroy( event )
 
    local sceneGroup = self.view
 
-	titleText1:removeSelf()
-	titleText1 = nil
-   addBtn:removeSelf()
-   addBtn = nil
-
-	
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.
    -- Example: remove display objects, save state, etc.

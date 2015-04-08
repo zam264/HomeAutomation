@@ -89,6 +89,7 @@ function scene:hide( event )
     if ( phase == "will" ) then
    		titleText1.isVisible = false
       passwordField.isVisible = false
+      ipField.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -102,8 +103,10 @@ function scene:destroy( event )
    local sceneGroup = self.view
 	titleText1:removeSelf()
 	titleText1 = nil
-  passwordField.removeSelf()
+  passwordField:removeSelf()
   passwordField = nil
+  ipField:removeSelf()
+  ipField = nil
    if ( phase == "will" ) then
       titleText1.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
