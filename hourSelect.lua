@@ -7,15 +7,17 @@ local schedule = require ("schedule")
 -- unless "composer.removeScene()" is called.
 ---------------------------------------------------------------------------------
 local titleText
+local rowWidth = 5
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
-local horizontalOffset = contentWidth * .25
-local verticalOffset = contentHeight * .2
-local newVerticalOffset = contentHeight * .2
+local horizontalOffset = contentWidth * (1 / (rowWidth + 1))
+local verticalOffset = contentHeight * .15
+local newVerticalOffset = contentHeight * .20 --This acts as the starting point for the rows
 local btnWidth = contentWidth * .2
 local btnHeight = contentWidth * .2
 local optionBtns = {}
 local options = {
+	"0",
 	"1",
 	"2",
 	"3",
@@ -27,7 +29,18 @@ local options = {
 	"9",
 	"10",
 	"11",
-	"12"
+	"12",
+	"13",
+	"14",
+	"15",
+	"16",
+	"17",
+	"18",
+	"19",
+	"20",
+	"21",
+	"22",
+	"23"	
 }
 
 local function onOptionSelect(x)
@@ -42,7 +55,7 @@ end
 function scene:create( event )
 	--composer.getScene("menu"):destroy()
 	local sceneGroup = self.view
-	titleText = display.newText( "Select a option", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
+	titleText = display.newText( "Select hour for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
 	sceneGroup:insert(titleText)
 
 	local i = 1
@@ -59,13 +72,13 @@ function scene:create( event )
    		}
 	    optionBtns[i].anchorX = .5
 		optionBtns[i].anchorY = .5
-		if (i % 3 == 0) then
+		if (i % rowWidth == 0) then
 			optionBtns[i].y = newVerticalOffset 
-			optionBtns[i].x = horizontalOffset * 3
+			optionBtns[i].x = horizontalOffset * rowWidth
 			newVerticalOffset = newVerticalOffset + verticalOffset
 		else
 			optionBtns[i].y = newVerticalOffset
-			optionBtns[i].x = horizontalOffset * (i % 3)
+			optionBtns[i].x = horizontalOffset * (i % rowWidth)
 		end
 		sceneGroup:insert(optionBtns[i])
 

@@ -37,7 +37,7 @@ end
 function scene:create( event )
 	--composer.getScene("menu"):destroy()
 	local sceneGroup = self.view
-	titleText = display.newText( "Select a option", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
+	titleText = display.newText( "Select day for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
 	sceneGroup:insert(titleText)
 
 	local i = 1
