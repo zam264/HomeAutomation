@@ -16,22 +16,21 @@ local btnWidth = contentWidth * .2
 local btnHeight = contentWidth * .2
 local optionBtns = {}
 local options = {
-	"1",
-	"2",
-	"3",
-	"4",
-	"Cool",
-	"Heat",
-	"Fan"
+	"00",
+	"10",
+	"20",
+	"30",
+	"40",
+	"50"
 }
 
 local function onOptionSelect(x)
    --titleText1.text = titleText1.text .. "1"
-   scheduleString = options[x]
+   scheduleString = scheduleString .. options[x] .. " "
    local file = io.open( path, "a" )
    file:write( options[x] )
    io.close( file )
-   composer.gotoScene( "daySelect", {effect="fade", time=200}) 
+   composer.gotoScene( "selectEndHour", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end
 ---------------------------------------------------------------------------------
@@ -40,7 +39,7 @@ end
 function scene:create( event )
 	--composer.getScene("menu"):destroy()
 	local sceneGroup = self.view
-	titleText = display.newText( "Select pin for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)	
+	titleText = display.newText( "Select start minute for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)	
 	sceneGroup:insert(titleText)
 
 	local i = 1
