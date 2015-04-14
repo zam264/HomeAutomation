@@ -28,6 +28,9 @@ local options = {
 local function onOptionSelect(x)
    --titleText1.text = titleText1.text .. "1"
    scheduleString = options[x]
+   local file = io.open( path, "a" )
+   file:write( options[x] )
+   io.close( file )
    composer.gotoScene( "daySelect", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end

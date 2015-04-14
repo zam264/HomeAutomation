@@ -12,7 +12,7 @@ local titleText1, addBtn
 scheduleString = "testString"
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
-local verticalOffset = contentHeight * .15
+local verticalOffset = contentHeight * .1
 local verticalOffsetNew = contentHeight * .25 
 local verticalOffsetStart = verticalOffsetNew --this acts as the start point for events list
 local events = {}
@@ -29,10 +29,40 @@ end
 
 local function onClrBtn()
    local file = io.open( path, "w" )
-   file:write( "clear" )
+   file:write( "" )
    io.close( file )
+   refreshScreen()
    --composer.removeScene("schedule")
 end
+
+function refreshScreen()
+   local i = 1 --loop control variable
+   local j = #events
+   print(j)
+   if j > 0 then --check if there are any events to handle
+      --there are events, remove them and prepare to re-draw them
+      print("Handling events")
+      while i <= j do
+         events[i]:removeSelf()
+         events[i] = nil
+         i = i + 1 
+      end
+      verticalOffsetNew = verticalOffsetStart
+   end
+   --(re)populate events
+   local file = io.open( path, "r" )     
+   i = 1
+   for line in file:lines() do
+      --if i % 4 == 0 then
+      events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew, native.systemFont ,contentHeight * .045)
+      sceneGroup:insert(events[i])
+      print( line )
+      verticalOffsetNew = verticalOffsetNew + verticalOffset
+      i = i + 1
+   end
+      io.close(file)  
+end
+
 
 -- "scene:create()"
 function scene:create( event )
@@ -82,8 +112,8 @@ function scene:show( event )
    if ( phase == "will" ) then
 		titleText1.isVisible = true
       addBtn.isVisible = true
-
-      local i = 1 --loop control variable
+      refreshScreen()
+     --[[ local i = 1 --loop control variable
       local j = #events
       print(j)
       if j > 0 then --check if there are any events to handle
@@ -100,13 +130,14 @@ function scene:show( event )
       local file = io.open( path, "r" )     
       i = 1
       for line in file:lines() do
+         --if i % 4 == 0 then
          events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew, native.systemFont ,contentHeight * .045)
          sceneGroup:insert(events[i])
          print( line )
          verticalOffsetNew = verticalOffsetNew + verticalOffset
          i = i + 1
       end
-      io.close(file)  
+      io.close(file)  ]]
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
       titleText1.text = scheduleString

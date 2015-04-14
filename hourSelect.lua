@@ -17,16 +17,16 @@ local btnWidth = contentWidth * .2
 local btnHeight = contentWidth * .2
 local optionBtns = {}
 local options = {
-	"0",
-	"1",
-	"2",
-	"3",
-	"4",
-	"5",
-	"6",
-	"7",
-	"8",
-	"9",
+	"00",
+	"01",
+	"02",
+	"03",
+	"04",
+	"05",
+	"06",
+	"07",
+	"08",
+	"09",
 	"10",
 	"11",
 	"12",
@@ -46,6 +46,9 @@ local options = {
 local function onOptionSelect(x)
    --titleText1.text = titleText1.text .. "1"
    scheduleString = scheduleString .. options[x]
+   local file = io.open( path, "a" )
+   file:write( options[x] )
+   io.close( file )
    composer.gotoScene( "selectMinute", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end
