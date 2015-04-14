@@ -18,8 +18,30 @@ local verticalOffsetStart = verticalOffsetNew --this acts as the start point for
 local events = {}
 
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
-path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
+local fhd = io.open( path )
+if fhd then
+   print( "File exists" )
+   fhd:close()
+else
+   --fhd:close()
+   print( "File does not exist!" )
+   local file = io.open( path, "w" )
+   file:write( "" )
+   io.close( file )
+end
 
+path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
+local fhd = io.open( path2 )
+if fhd then
+   print( "File exists" )
+   fhd:close()
+else
+   --fhd:close()
+   print( "File does not exist!" )
+   local file = io.open( path2, "w" )
+   file:write( "" )
+   io.close( file )
+end
 ---------------------------------------------------------------------------------
 
 local function onAddBtn()
