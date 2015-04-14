@@ -49,7 +49,7 @@ local function onOptionSelect(x)
    local file = io.open( path, "a" )
    file:write( options[x] )
    io.close( file )
-   composer.gotoScene( "selectEndMinute", {effect="fade", time=200}) 
+   composer.gotoScene( "selectMinute", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end
 ---------------------------------------------------------------------------------
@@ -58,7 +58,7 @@ end
 function scene:create( event )
 	--composer.getScene("menu"):destroy()
 	local sceneGroup = self.view
-	titleText = display.newText( "Select end hour for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .05)	
+	titleText = display.newText( "Select hour for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .05)	
 	sceneGroup:insert(titleText)
 
 	local i = 1

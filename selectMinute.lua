@@ -42,7 +42,7 @@ end
 function scene:create( event )
 	--composer.getScene("menu"):destroy()
 	local sceneGroup = self.view
-	titleText = display.newText( "Select end minute for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)	
+	titleText = display.newText( "Select minute for task", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)	
 	sceneGroup:insert(titleText)
 
 	local i = 1

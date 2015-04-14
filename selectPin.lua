@@ -31,7 +31,7 @@ local function onOptionSelect(x)
    local file = io.open( path, "a" )
    file:write( options[x] )
    io.close( file )
-   composer.gotoScene( "selectDay", {effect="fade", time=200}) 
+   composer.gotoScene( "selectState", {effect="fade", time=200}) 
    return true -- indicates successful touch
 end
 ---------------------------------------------------------------------------------
