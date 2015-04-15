@@ -1,7 +1,7 @@
 local composer = require( "composer" )
 --local pinSelect = require ("pinSelect")
 local scene = composer.newScene()
-local widget = require "widget"		-- include Corona's "widget" library
+local widget = require "widget"     -- include Corona's "widget" library
 ---------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE
 -- unless "composer.removeScene()" is called.
@@ -16,6 +16,26 @@ local verticalOffset = contentHeight * .1
 local verticalOffsetNew = contentHeight * .25 
 local verticalOffsetStart = verticalOffsetNew --this acts as the start point for events list
 local events = {}
+local allControlsGroup = display.newGroup()
+local scrollView = widget.newScrollView
+   {
+      top = 150,
+      left = 0,
+      width = contentWidth,
+      scrollWidth = contentWidth,
+      -- height = contentHeight - 100,
+      -- scrollHeight = contentHeight - 300,
+      height = contentHeight - 400,
+      scrollHeight = 0,
+      listener = scrollListener,
+      horizontalScrollDisabled = true,
+      -- hideBackground = true
+      backgroundColor = { 0.8, 0.8, 0.8 }
+      -- isBounceEnabled = false
+   }
+   scrollView:insert( allControlsGroup )
+   sceneGroup:insert(scrollView)
+
 
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 local fhd = io.open( path )
@@ -67,6 +87,26 @@ local function onPushBtn()
 end
 
 function refreshScreen()
+   -- local scrollView = widget.newScrollView
+   -- {
+   --    top = 150,
+   --    left = 0,
+   --    width = contentWidth,
+   --    scrollWidth = contentWidth,
+   --    -- height = contentHeight - 100,
+   --    -- scrollHeight = contentHeight - 300,
+   --    height = contentHeight - 400,
+   --    scrollHeight = 0,
+   --    listener = scrollListener,
+   --    horizontalScrollDisabled = true,
+   --    -- hideBackground = true
+   --    backgroundColor = { 0.8, 0.8, 0.8 }
+   --    -- isBounceEnabled = false
+   -- }
+   -- scrollView:insert( allControlsGroup )
+   -- sceneGroup:insert(scrollView)
+
+
    titleText1.text = "Most Recent Event"
    local i = 1 --loop control variable
    local j = #events
@@ -86,10 +126,12 @@ function refreshScreen()
    i = 1
    for line in file:lines() do
       --if i % 4 == 0 then
-      events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew, native.systemFont ,contentHeight * .045)
-      sceneGroup:insert(events[i])
+      events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew-200, native.systemFont ,contentHeight * .045)
+      -- sceneGroup:insert(events[i])
+      allControlsGroup:insert(events[i])
+
       print( line )
-      verticalOffsetNew = verticalOffsetNew + verticalOffset
+      verticalOffsetNew = verticalOffsetNew + verticalOffset 
       i = i + 1
    end
       io.close(file)  
@@ -98,10 +140,31 @@ end
 
 -- "scene:create()"
 function scene:create( event )
-   sceneGroup = self.view	
+   sceneGroup = self.view  
 
-	titleText1 = display.newText( scheduleString, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)
-	sceneGroup:insert(titleText1)
+   titleText1 = display.newText( scheduleString, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)
+   sceneGroup:insert(titleText1)
+
+
+
+   -- -- Create the widget
+   -- local scrollView = widget.newScrollView
+   -- {
+   --    top = 0,
+   --    left = 0,
+   --    width = contentWidth,
+   --    scrollWidth = contentWidth,
+   --    height = contentHeight - 100,
+   --    scrollHeight = contentHeight - 100,
+   --    listener = scrollListener,
+   --    horizontalScrollDisabled = true,
+   --    -- isBounceEnabled = false
+   -- }
+   scrollView:insert( allControlsGroup )
+   sceneGroup:insert(scrollView)
+
+
+
 
    addBtn = widget.newButton{
       label="Add",
@@ -157,12 +220,14 @@ function scene:show( event )
    local sceneGroup = self.view
    local phase = event.phase
    if ( phase == "will" ) then
-		titleText1.isVisible = true
+      titleText1.isVisible = true
       addBtn.isVisible = true
       refreshScreen()
+      allControlsGroup.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
       titleText1.text = scheduleString
+      
       -- Called when the scene is now on screen.
       -- Insert code here to make the scene come alive.
       -- Example: start timers, begin animation, play audio, etc.
@@ -173,11 +238,13 @@ end
 function scene:hide( event )
 
    local sceneGroup = self.view
+   -- local allControlsGroup.isVisible = false
    local phase = event.phase
 
    if ( phase == "will" ) then
-   		titleText1.isVisible = false
+         titleText1.isVisible = false
          addBtn.isVisible = false
+         allControlsGroup.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -190,13 +257,14 @@ end
 function scene:destroy( event )
 
    local sceneGroup = self.view
+   allControlsGroup:removeSelf()
 
-	titleText1:removeSelf()
-	titleText1 = nil
+   titleText1:removeSelf()
+   titleText1 = nil
    addBtn:removeSelf()
    addBtn = nil
 
-	
+   
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.
    -- Example: remove display objects, save state, etc.
