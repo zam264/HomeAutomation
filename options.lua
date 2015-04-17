@@ -74,6 +74,7 @@ function scene:show( event )
     if ( phase == "will" ) then
   	titleText1.isVisible = true
     passwordField.isVisible = true
+    ipField.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
     elseif ( phase == "did" ) then
       -- Called when the scene is now on screen.
