@@ -19,7 +19,7 @@ local events = {}
 local allControlsGroup = display.newGroup()
 local scrollView = widget.newScrollView
    {
-      top = 150,
+      top = 250,
       left = 0,
       width = contentWidth,
       scrollWidth = contentWidth,
@@ -30,7 +30,7 @@ local scrollView = widget.newScrollView
       listener = scrollListener,
       horizontalScrollDisabled = true,
       -- hideBackground = true
-      backgroundColor = { 0.8, 0.8, 0.8 }
+      backgroundColor = { 0.45, 0.45, 0.45 }
       -- isBounceEnabled = false
    }
    scrollView:insert( allControlsGroup )
@@ -87,26 +87,6 @@ local function onPushBtn()
 end
 
 function refreshScreen()
-   -- local scrollView = widget.newScrollView
-   -- {
-   --    top = 150,
-   --    left = 0,
-   --    width = contentWidth,
-   --    scrollWidth = contentWidth,
-   --    -- height = contentHeight - 100,
-   --    -- scrollHeight = contentHeight - 300,
-   --    height = contentHeight - 400,
-   --    scrollHeight = 0,
-   --    listener = scrollListener,
-   --    horizontalScrollDisabled = true,
-   --    -- hideBackground = true
-   --    backgroundColor = { 0.8, 0.8, 0.8 }
-   --    -- isBounceEnabled = false
-   -- }
-   -- scrollView:insert( allControlsGroup )
-   -- sceneGroup:insert(scrollView)
-
-
    titleText1.text = "Most Recent Event"
    local i = 1 --loop control variable
    local j = #events
@@ -145,21 +125,6 @@ function scene:create( event )
    titleText1 = display.newText( scheduleString, contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .045)
    sceneGroup:insert(titleText1)
 
-
-
-   -- -- Create the widget
-   -- local scrollView = widget.newScrollView
-   -- {
-   --    top = 0,
-   --    left = 0,
-   --    width = contentWidth,
-   --    scrollWidth = contentWidth,
-   --    height = contentHeight - 100,
-   --    scrollHeight = contentHeight - 100,
-   --    listener = scrollListener,
-   --    horizontalScrollDisabled = true,
-   --    -- isBounceEnabled = false
-   -- }
    scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
 
