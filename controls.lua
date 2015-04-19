@@ -15,14 +15,11 @@ local contentHeight = display.contentHeight
 local btnWidth = contentWidth * .45
 local btnHeight = contentHeight * .08
 local allControlsGroup = display.newGroup()
+local lastPinResponse			--the last pin checked
+local lastPin 					--true/false; did we get an actual response back
+local pinCheckTimeout = 2000	--time to wait for pin response
 
-local function networkListener(event)
-	if(event.isError) then
-		print("Network Error")
-	else
-		print("Response: " .. event.response)
-	end
-end
+
 
 local function onControlsBtn()
 	composer.gotoScene( "controls", {effect="fade", time=200})
@@ -39,11 +36,11 @@ local function onOptionsBtn()
 
 	return true	-- indicates successful touch
 end
-local function togglePin(pin)
-	print("Pin: " .. pin .. " toggled")
-	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
-	return true	-- indicates successful touch
-end
+
+
+
+
+
 ---------------------------------------------------------------------------------
 local function getApplianceNameTextXCoordinate(theNameText)
 	local positionAdjustment = 40
@@ -96,7 +93,97 @@ local function getApplianceNameTextXCoordinate(theNameText)
   	return (contentHeight / 9) * 8
   end
 
--- "scene:create()"
+
+local function networkListener(event)
+	-- native.setActivityIndicator( true )
+	
+	if(event.isError) then
+		print("Network Error")
+		return false
+	else
+		print("Response: " .. event.response)
+		return true
+	end
+end
+
+--listens for the pin status
+-- local function networkListenerPinStatus(returnEvent)
+local function networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber)
+	if(returnEvent.isError) then
+		print("Network Error")
+		return false
+	else
+		print("Pin status (on/off): " .. returnEvent.response)
+		lastPinResponse = tonumber(returnEvent.response)
+		return true
+	end
+end
+
+--toggles the specified pin
+local function togglePin(pin)
+	print("Pin: " .. pin .. " toggled")
+	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
+	return true	-- indicates successful touch
+end
+
+--asks for the pin status
+local function sendForPinStatus(aGroup, aButton, pinNumber)
+	print("Getting pin status for\t" .. pinNumber)
+	lastPin = pin
+	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--closure
+	network.request("http://cpsc.xthon.com/getPin.php?pinNum=" .. pinNumber, "POST", networkListener)
+end
+
+--sets the button icon based on whether the pin is already on or off
+local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
+	print("Updating Button")
+	aButton:removeSelf()
+	-- if(lastPin == pinNumber) then
+		local defaultFileLocation
+		local overFileLocation
+
+		if(lastPinResponse == 0) then
+			defaultFileLocation = "imgs/pushButton.png"
+			overFileLocation = "imgs/pushButton-over.png"
+		else
+			defaultFileLocation = "imgs/pushButtonOn.png"
+			overFileLocation = "imgs/pushButton-overOn.png"
+		end
+
+		aButton = widget.newButton{
+		defaultFile= defaultFileLocation,
+		overFile= overFileLocation,
+		width=getOnOffButtonWidth(),
+		height=getOnOffButtonHeight(),
+		onRelease = function()  
+						togglePin(5) 
+						sendForPinStatus(5)
+						print("WAITING SECONDS")
+						local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
+							timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
+					end
+		}
+
+		aButton.anchorX = 0
+		aButton.anchorY = 0
+		aButton.x = getOnOffButtonXCoordinate()
+		aButton.y = getOnOffButtonYCoordinate()
+
+		aGroup:insert(aButton)
+		allControlsGroup:insert(aGroup)
+	-- end
+end
+
+--updates the icon/state of the button passed in
+local function updateButtonState(aGroup, aButton, pinNumber)
+	togglePin(pinNumber) 
+	-- (aGroup, aButton, pinNumber)
+	sendForPinStatus(aGroup, aButton, pinNumber)
+	print("WAITING SECONDS")		--wait so many seconds for the server to respond
+	local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
+	timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
+end
+
 function scene:create( event )
 
 	sceneGroup = self.view	
@@ -127,7 +214,6 @@ function scene:create( event )
 	   	lightGroupOne.y = getControlGroupingYCoordinate(0)
 	   	sceneGroup:insert(lightGroupOne)
 	 	backgroundOne = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
 	 	backgroundOne.width = contentWidth
 	 	backgroundOne.height = getControlBackgroundHeight()
 	 	lightGroupOne:insert( backgroundOne )
@@ -139,22 +225,21 @@ function scene:create( event )
 
 
 		btn0 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
 			defaultFile="imgs/pushButton.png",
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(5) end
+			onRelease = function() return updateButtonState(lightGroupOne, btn0, 5) end
 		}
 		btn0.anchorX = 0
 		btn0.anchorY = 0
 		btn0.x = getOnOffButtonXCoordinate()
 		btn0.y = getOnOffButtonYCoordinate()
-	lightGroupOne:insert(btn0)
-	allControlsGroup:insert(lightGroupOne)
-	
+		lightGroupOne:insert(btn0)
+		allControlsGroup:insert(lightGroupOne)
+		updateButtonState(lightGroupOne, btn0, 5) 
+		--button state is initially off and this checks the server for actual state on screen load
+		
 
 
 
@@ -176,14 +261,12 @@ function scene:create( event )
 
 
 		btn1 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
 			defaultFile="imgs/pushButton.png",
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(1) end
+			onRelease = function() return updateButtonState(lightGroupTwo, btn1, 5) end
+			
 		}
 		btn1.anchorX = 0
 		btn1.anchorY = 0
@@ -191,7 +274,8 @@ function scene:create( event )
 		btn1.y = getOnOffButtonYCoordinate()
 	lightGroupTwo:insert(btn1)
 	allControlsGroup:insert(lightGroupTwo)
-
+	updateButtonState(lightGroupTwo, btn1, 5)
+	--button state is initially off and this checks the server for actual state on screen load
 
 
 
@@ -220,7 +304,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(2) end
+			onRelease = function() return updateButtonState(lightGroupThree, btn2, 2) end
 		}
 		btn2.anchorX = 0
 		btn2.anchorY = 0
@@ -228,6 +312,8 @@ function scene:create( event )
 		btn2.y = getOnOffButtonYCoordinate()
 	lightGroupThree:insert(btn2)
 	allControlsGroup:insert(lightGroupThree)
+	updateButtonState(lightGroupThree, btn2, 2)
+	--button state is initially off and this checks the server for actual state on screen load
 
 
 
@@ -257,7 +343,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(3) end
+			onRelease = function() return updateButtonState(lightGroupFour, btn3, 3) end
 		}
 		btn3.anchorX = 0
 		btn3.anchorY = 0
@@ -265,6 +351,8 @@ function scene:create( event )
 		btn3.y = getOnOffButtonYCoordinate()
 	lightGroupFour:insert(btn3)
 	allControlsGroup:insert(lightGroupFour)
+	updateButtonState(lightGroupFour, btn3, 3)
+	--button state is initially off and this checks the server for actual state on screen load
 
 
 
@@ -287,14 +375,11 @@ function scene:create( event )
 
 
 		btn4 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
 			defaultFile="imgs/pushButton.png",
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(4) end
+			onRelease = function() return updateButtonState(lightGroupFive, btn4, 4) end
 		}
 		btn4.anchorX = 0
 		btn4.anchorY = 0
@@ -302,6 +387,8 @@ function scene:create( event )
 		btn4.y = getOnOffButtonYCoordinate()
 	lightGroupFive:insert(btn4)	
 	allControlsGroup:insert(lightGroupFive)
+	updateButtonState(lightGroupFive, btn4, 4)
+	--button state is initially off and this checks the server for actual state on screen load
 
 
 
@@ -322,14 +409,11 @@ function scene:create( event )
 
 
 		btn5 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
 			defaultFile="imgs/pushButton.png",
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(15) end
+			onRelease = function() return updateButtonState(lightGroupSix, btn5, 15) end
 		}
 		btn5.anchorX = 0
 		btn5.anchorY = 0
@@ -337,6 +421,8 @@ function scene:create( event )
 		btn5.y = getOnOffButtonYCoordinate()
 	lightGroupSix:insert(btn5)
 	allControlsGroup:insert(lightGroupSix)
+	updateButtonState(lightGroupSix, btn5, 15) 
+	--button state is initially off and this checks the server for actual state on screen load
 
 
 
@@ -368,7 +454,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(16) end
+			onRelease = function() return updateButtonState(lightGroupSeven, btn6, 16) end
 		}
 		btn6.anchorX = 0
 		btn6.anchorY = 0
@@ -376,6 +462,8 @@ function scene:create( event )
 		btn6.y = getOnOffButtonYCoordinate()
 	lightGroupSeven:insert(btn6)
 	allControlsGroup:insert(lightGroupSeven)	
+	updateButtonState(lightGroupSeven, btn6, 16)
+	--button state is initially off and this checks the server for actual state on screen load
 
 	
 local tabButtons = {
