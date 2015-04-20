@@ -115,6 +115,13 @@ local function networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber)
 	else
 		print("Pin status (on/off): " .. returnEvent.response)
 		lastPinResponse = tonumber(returnEvent.response)
+
+
+		
+		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
+		--want to get this working from this method so buttons are updated as soon as the server replies
+		--will need to rearrange functions, etc. probably
+
 		return true
 	end
 end
@@ -130,7 +137,7 @@ end
 local function sendForPinStatus(aGroup, aButton, pinNumber)
 	print("Getting pin status for\t" .. pinNumber)
 	lastPin = pin
-	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--closure
+	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
 	network.request("http://cpsc.xthon.com/getPin.php?pinNum=" .. pinNumber, "POST", networkListener)
 end
 
@@ -157,7 +164,7 @@ local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
 		height=getOnOffButtonHeight(),
 		onRelease = function()  
 						togglePin(5) 
-						sendForPinStatus(5)
+						sendForPinStatus(aGroup, aButton, 5)
 						print("WAITING SECONDS")
 						local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
 							timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
