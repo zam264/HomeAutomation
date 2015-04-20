@@ -15,8 +15,8 @@ local contentHeight = display.contentHeight
 local btnWidth = contentWidth * .45
 local btnHeight = contentHeight * .08
 local allControlsGroup = display.newGroup()
-local lastPinResponse			--the last pin checked
-local lastPin 					--true/false; did we get an actual response back
+local lastPinResponse = -1			--the last pin checked
+local lastPin = -1					--true/false; did we get an actual response back
 local pinCheckTimeout = 2000	--time to wait for pin response
 
 
@@ -106,70 +106,59 @@ local function networkListener(event)
 	end
 end
 
---listens for the pin status
--- local function networkListenerPinStatus(returnEvent)
-local function networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber)
-	if(returnEvent.isError) then
-		print("Network Error")
-		return false
-	else
-		print("Pin status (on/off): " .. returnEvent.response)
-		lastPinResponse = tonumber(returnEvent.response)
+-- --listens for the pin status
+-- -- local function networkListenerPinStatus(returnEvent)
+-- local function networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber)
+-- 	if(returnEvent.isError) then
+-- 		print("Network Error")
+-- 		return false
+-- 	else
+-- 		print("Pin status (on/off): " .. returnEvent.response)
+-- 		lastPinResponse = tonumber(returnEvent.response)
 
 
 		
-		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
-		--want to get this working from this method so buttons are updated as soon as the server replies
-		--will need to rearrange functions, etc. probably
+-- 		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
+-- 		--want to get this working from this method so buttons are updated as soon as the server replies
+-- 		--will need to rearrange functions, etc. probably
 
-		return true
-	end
-end
+-- 		return true
+-- 	end
+-- end
 
---toggles the specified pin
-local function togglePin(pin)
-	print("Pin: " .. pin .. " toggled")
-	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
-	return true	-- indicates successful touch
-end
 
---asks for the pin status
-local function sendForPinStatus(aGroup, aButton, pinNumber)
-	print("Getting pin status for\t" .. pinNumber)
-	lastPin = pin
-	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
-	network.request("http://cpsc.xthon.com/getPin.php?pinNum=" .. pinNumber, "POST", networkListener)
-end
 
---sets the button icon based on whether the pin is already on or off
-local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
-	print("Updating Button")
-	aButton:removeSelf()
-	-- if(lastPin == pinNumber) then
-		local defaultFileLocation
-		local overFileLocation
 
-		if(lastPinResponse == 0) then
-			defaultFileLocation = "imgs/pushButton.png"
-			overFileLocation = "imgs/pushButton-over.png"
+local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus)
+		if(listener.isError) then
+		print("Network Error")
+		return false
 		else
-			defaultFileLocation = "imgs/pushButtonOn.png"
-			overFileLocation = "imgs/pushButton-overOn.png"
-		end
+			print("Pin status changed to (on/off): " .. listener.response)
+			lastPinResponse = tonumber(listener.response)
 
-		aButton = widget.newButton{
-		defaultFile= defaultFileLocation,
-		overFile= overFileLocation,
-		width=getOnOffButtonWidth(),
-		height=getOnOffButtonHeight(),
-		onRelease = function()  
-						togglePin(5) 
-						sendForPinStatus(aGroup, aButton, 5)
-						print("WAITING SECONDS")
-						local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
-							timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
-					end
-		}
+
+			print("Updating Button")
+			aButton:removeSelf()
+			-- if(lastPin == pinNumber) then
+			local defaultFileLocation
+			local overFileLocation
+
+			if(newStatus == 0) then
+				defaultFileLocation = "imgs/pushButton.png"
+				overFileLocation = "imgs/pushButton-over.png"
+			else
+				defaultFileLocation = "imgs/pushButtonOn.png"
+				overFileLocation = "imgs/pushButton-overOn.png"
+			end
+
+			aButton = widget.newButton{
+				defaultFile= defaultFileLocation,
+				overFile= overFileLocation,
+				width=getOnOffButtonWidth(),
+				height=getOnOffButtonHeight(),
+				onRelease = function() return togglePins(lightGroupOne, btn0, 5) end
+			}
 
 		aButton.anchorX = 0
 		aButton.anchorY = 0
@@ -178,18 +167,132 @@ local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
 
 		aGroup:insert(aButton)
 		allControlsGroup:insert(aGroup)
-	-- end
+
+		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
+		--want to get this working from this method so buttons are updated as soon as the server replies
+		--will need to rearrange functions, etc. probably
+
+		-- local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
+		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. theState, "POST", networkListener)
+
+		return true
+	end
 end
 
---updates the icon/state of the button passed in
-local function updateButtonState(aGroup, aButton, pinNumber)
-	togglePin(pinNumber) 
-	-- (aGroup, aButton, pinNumber)
-	sendForPinStatus(aGroup, aButton, pinNumber)
-	print("WAITING SECONDS")		--wait so many seconds for the server to respond
-	local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
-	timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
+
+
+local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber)
+	if(listener.isError) then
+		print("Network Error")
+		return false
+	else
+		print("Current status (on/off): " .. listener.response)
+		local newStatus = tonumber(listener.response)
+		if(newStatus == 1) then
+			newStatus = 0
+		else
+			newStatus = 1
+		end
+
+		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus
+		local params = {}
+		params.body = body
+
+		local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, newStatus) end 	--wrapper so parameters can be passed
+		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus, "POST", networkListener)
+		network.request("http://cpsc.xthon.com/setPin.php", "POST", networkListener, params)
+
+		return true
+	end
 end
+
+
+
+
+
+
+local function togglePin(aGroup, aButton, pinNumber)
+	print('Toggling pin#' .. pinNumber)
+	
+	local body = "pass=abcd4321&pinNum=" .. pinNumber
+	local params = {}
+	params.body = body
+
+	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
+	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+	-- network.request("http://cpsc.xthon.com/getPin.php?pass=abcd4321&pinNum=" .. pinNumber, "POST", networkListener)
+
+end
+
+
+
+
+
+
+--toggles the specified pin
+-- local function togglePin(pin)
+-- 	print("Pin: " .. pin .. " toggled")
+-- 	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
+-- 	return true	-- indicates successful touch
+-- end
+
+-- --asks for the pin status
+-- local function sendForPinStatus(aGroup, aButton, pinNumber)
+-- 	print("Getting pin status for\t" .. pinNumber)
+-- 	lastPin = pin
+-- 	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
+-- 	network.request("http://cpsc.xthon.com/getPin.php?pinNum=" .. pinNumber, "POST", networkListener)
+-- end
+
+-- --sets the button icon based on whether the pin is already on or off
+-- local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
+-- 	print("Updating Button")
+-- 	aButton:removeSelf()
+-- 	-- if(lastPin == pinNumber) then
+-- 		local defaultFileLocation
+-- 		local overFileLocation
+
+-- 		if(lastPinResponse == 0) then
+-- 			defaultFileLocation = "imgs/pushButton.png"
+-- 			overFileLocation = "imgs/pushButton-over.png"
+-- 		else
+-- 			defaultFileLocation = "imgs/pushButtonOn.png"
+-- 			overFileLocation = "imgs/pushButton-overOn.png"
+-- 		end
+
+-- 		aButton = widget.newButton{
+-- 		defaultFile= defaultFileLocation,
+-- 		overFile= overFileLocation,
+-- 		width=getOnOffButtonWidth(),
+-- 		height=getOnOffButtonHeight(),
+-- 		onRelease = function()  
+-- 						togglePin(5) 
+-- 						sendForPinStatus(aGroup, aButton, 5)
+-- 						print("WAITING SECONDS")
+-- 						local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
+-- 							timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
+-- 					end
+-- 		}
+
+-- 		aButton.anchorX = 0
+-- 		aButton.anchorY = 0
+-- 		aButton.x = getOnOffButtonXCoordinate()
+-- 		aButton.y = getOnOffButtonYCoordinate()
+
+-- 		aGroup:insert(aButton)
+-- 		allControlsGroup:insert(aGroup)
+-- 	-- end
+-- end
+
+-- --updates the icon/state of the button passed in
+-- local function updateButtonState(aGroup, aButton, pinNumber)
+-- 	togglePin(pinNumber) 
+-- 	-- (aGroup, aButton, pinNumber)
+-- 	sendForPinStatus(aGroup, aButton, pinNumber)
+-- 	print("WAITING SECONDS")		--wait so many seconds for the server to respond
+-- 	local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
+-- 	timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
+-- end
 
 function scene:create( event )
 
@@ -236,7 +339,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupOne, btn0, 5) end
+			onRelease = function() return togglePin(lightGroupOne, btn0, 5) end
 		}
 		btn0.anchorX = 0
 		btn0.anchorY = 0
@@ -244,7 +347,8 @@ function scene:create( event )
 		btn0.y = getOnOffButtonYCoordinate()
 		lightGroupOne:insert(btn0)
 		allControlsGroup:insert(lightGroupOne)
-		updateButtonState(lightGroupOne, btn0, 5) 
+
+		-- updateButtonState(lightGroupOne, btn0, 5) 
 		--button state is initially off and this checks the server for actual state on screen load
 		
 
@@ -281,7 +385,7 @@ function scene:create( event )
 		btn1.y = getOnOffButtonYCoordinate()
 	lightGroupTwo:insert(btn1)
 	allControlsGroup:insert(lightGroupTwo)
-	updateButtonState(lightGroupTwo, btn1, 5)
+	-- updateButtonState(lightGroupTwo, btn1, 5)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -319,7 +423,7 @@ function scene:create( event )
 		btn2.y = getOnOffButtonYCoordinate()
 	lightGroupThree:insert(btn2)
 	allControlsGroup:insert(lightGroupThree)
-	updateButtonState(lightGroupThree, btn2, 2)
+	-- updateButtonState(lightGroupThree, btn2, 2)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -358,7 +462,7 @@ function scene:create( event )
 		btn3.y = getOnOffButtonYCoordinate()
 	lightGroupFour:insert(btn3)
 	allControlsGroup:insert(lightGroupFour)
-	updateButtonState(lightGroupFour, btn3, 3)
+	-- updateButtonState(lightGroupFour, btn3, 3)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -394,7 +498,7 @@ function scene:create( event )
 		btn4.y = getOnOffButtonYCoordinate()
 	lightGroupFive:insert(btn4)	
 	allControlsGroup:insert(lightGroupFive)
-	updateButtonState(lightGroupFive, btn4, 4)
+	-- updateButtonState(lightGroupFive, btn4, 4)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -428,7 +532,7 @@ function scene:create( event )
 		btn5.y = getOnOffButtonYCoordinate()
 	lightGroupSix:insert(btn5)
 	allControlsGroup:insert(lightGroupSix)
-	updateButtonState(lightGroupSix, btn5, 15) 
+	-- updateButtonState(lightGroupSix, btn5, 15) 
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -469,7 +573,7 @@ function scene:create( event )
 		btn6.y = getOnOffButtonYCoordinate()
 	lightGroupSeven:insert(btn6)
 	allControlsGroup:insert(lightGroupSeven)	
-	updateButtonState(lightGroupSeven, btn6, 16)
+	-- updateButtonState(lightGroupSeven, btn6, 16)
 	--button state is initially off and this checks the server for actual state on screen load
 
 	
