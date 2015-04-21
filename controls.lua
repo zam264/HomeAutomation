@@ -126,25 +126,22 @@ end
 -- 	end
 -- end
 
+local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, assumedStatus, togglePin)
+	local actualStatus = tonumber(listener.response)
+	if(listener.isError) then
+			print("Network Error")
+			return false
+	else 
 
-
-
-local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus)
-		if(listener.isError) then
-		print("Network Error")
-		return false
-		else
-			print("Pin status changed to (on/off): " .. listener.response)
-			lastPinResponse = tonumber(listener.response)
-
-
+	-- else if(actualStatus == assumedStatus)  then
+		-- print("Current status (on/off): " .. listener.response)
 			print("Updating Button")
 			aButton:removeSelf()
 			-- if(lastPin == pinNumber) then
 			local defaultFileLocation
 			local overFileLocation
 
-			if(newStatus == 0) then
+			if(actualStatus == 0) then
 				defaultFileLocation = "imgs/pushButton.png"
 				overFileLocation = "imgs/pushButton-over.png"
 			else
@@ -157,7 +154,9 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 				overFile= overFileLocation,
 				width=getOnOffButtonWidth(),
 				height=getOnOffButtonHeight(),
-				onRelease = function() return togglePins(lightGroupOne, btn0, 5) end
+				-- onRelease = function() return togglePins(lightGroupOne, btn0, 5) end
+
+				onRelease = function() return togglePin(aGroup, aButton, pinNumber) end
 			}
 
 		aButton.anchorX = 0
@@ -166,7 +165,72 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		aButton.y = getOnOffButtonYCoordinate()
 
 		aGroup:insert(aButton)
+
 		allControlsGroup:insert(aGroup)
+	-- else
+	-- 	print("ERROR!!!! ASSUMED PIN STATUS DOES NOT MATCH ACTUAL STATUS")
+	end
+end
+
+
+-- local function verifyPinStatus(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
+-- 	print('Verifying pin#' .. pinNumber)
+	
+-- 	local body = "pass=abcd4321&pinNum=" .. pinNumber
+-- 	local params = {}
+-- 	params.body = body
+
+-- 	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, togglePin) end 	--wrapper so parameters can be passed
+-- 	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+-- end
+
+
+local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
+		if(listener.isError) then
+			print("Network Error")
+			return false
+		else
+			-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
+			-- lastPinResponse = tonumber(listener.response)
+			print('Verifying pin#' .. pinNumber)
+			local assumedStatus = newStatus
+			local body = "pass=abcd4321&pinNum=" .. pinNumber
+			local params = {}
+			params.body = body
+
+			local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
+			network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+		-- 	print("Updating Button")
+		-- 	aButton:removeSelf()
+		-- 	-- if(lastPin == pinNumber) then
+		-- 	local defaultFileLocation
+		-- 	local overFileLocation
+
+		-- 	if(newStatus == 0) then
+		-- 		defaultFileLocation = "imgs/pushButton.png"
+		-- 		overFileLocation = "imgs/pushButton-over.png"
+		-- 	else
+		-- 		defaultFileLocation = "imgs/pushButtonOn.png"
+		-- 		overFileLocation = "imgs/pushButton-overOn.png"
+		-- 	end
+
+		-- 	aButton = widget.newButton{
+		-- 		defaultFile= defaultFileLocation,
+		-- 		overFile= overFileLocation,
+		-- 		width=getOnOffButtonWidth(),
+		-- 		height=getOnOffButtonHeight(),
+		-- 		-- onRelease = function() return togglePins(lightGroupOne, btn0, 5) end
+
+		-- 		onRelease = function() return togglePin(aGroup, aButton, pinNumber) end
+		-- 	}
+
+		-- aButton.anchorX = 0
+		-- aButton.anchorY = 0
+		-- aButton.x = getOnOffButtonXCoordinate()
+		-- aButton.y = getOnOffButtonYCoordinate()
+
+		-- aGroup:insert(aButton)
+		-- allControlsGroup:insert(aGroup)
 
 		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
 		--want to get this working from this method so buttons are updated as soon as the server replies
@@ -181,7 +245,7 @@ end
 
 
 
-local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber)
+local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, togglePin)
 	if(listener.isError) then
 		print("Network Error")
 		return false
@@ -198,7 +262,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber)
 		local params = {}
 		params.body = body
 
-		local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, newStatus) end 	--wrapper so parameters can be passed
+		local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, newStatus, togglePin) end 	--wrapper so parameters can be passed
 		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus, "POST", networkListener)
 		network.request("http://cpsc.xthon.com/setPin.php", "POST", networkListener, params)
 
@@ -218,7 +282,7 @@ local function togglePin(aGroup, aButton, pinNumber)
 	local params = {}
 	params.body = body
 
-	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
+	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, togglePin) end 	--wrapper so parameters can be passed
 	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
 	-- network.request("http://cpsc.xthon.com/getPin.php?pass=abcd4321&pinNum=" .. pinNumber, "POST", networkListener)
 
