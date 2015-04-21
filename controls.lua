@@ -106,26 +106,18 @@ local function networkListener(event)
 	end
 end
 
--- --listens for the pin status
--- -- local function networkListenerPinStatus(returnEvent)
--- local function networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber)
--- 	if(returnEvent.isError) then
--- 		print("Network Error")
--- 		return false
--- 	else
--- 		print("Pin status (on/off): " .. returnEvent.response)
--- 		lastPinResponse = tonumber(returnEvent.response)
+
+---------------------------------------------NETWORK REQUEST STUFF (STARTS AT BOTTOM OF THIS BREAK) --------------------------------------------------------------
 
 
-		
--- 		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
--- 		--want to get this working from this method so buttons are updated as soon as the server replies
--- 		--will need to rearrange functions, etc. probably
-
--- 		return true
--- 	end
--- end
-
+--4. verifies the current status
+-- next layer in the stack
+-- NEEDS SOME WORK ON THE VERIFICATION END OF THINGS<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+-- checks to make sure the current pin status on the server matches what we asked for
+-- (we don't assume an 'okay' from the server actually means okay)
+-- NEEDS ERROR HANDLING IF THIS FAILS
+-- then sets the button image based on the current pin state (shows a light bulb if power is currently
+	-- on to the specified pin)
 local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, assumedStatus, togglePin)
 	local actualStatus = tonumber(listener.response)
 	if(listener.isError) then
@@ -135,12 +127,12 @@ local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumb
 
 	-- else if(actualStatus == assumedStatus)  then
 		-- print("Current status (on/off): " .. listener.response)
-			print("Updating Button")
+			print("5. Updating Button")
 			aButton:removeSelf()
 			-- if(lastPin == pinNumber) then
 			local defaultFileLocation
 			local overFileLocation
-
+			print("6. Verifying status (actual,assumed) " .. actualStatus .. ',' .. assumedStatus)
 			if(actualStatus == 0) then
 				defaultFileLocation = "imgs/pushButton.png"
 				overFileLocation = "imgs/pushButton-over.png"
@@ -173,18 +165,13 @@ local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumb
 end
 
 
--- local function verifyPinStatus(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
--- 	print('Verifying pin#' .. pinNumber)
-	
--- 	local body = "pass=abcd4321&pinNum=" .. pinNumber
--- 	local params = {}
--- 	params.body = body
 
--- 	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, togglePin) end 	--wrapper so parameters can be passed
--- 	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
--- end
-
-
+--3. sets the current status
+-- next layer in the stack
+-- this gets a pass/fail from the server
+--based on the success of the pin state change
+-- then makes a request to verify that the new
+-- pin status we wanted is the current pin status
 local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
 		if(listener.isError) then
 			print("Network Error")
@@ -192,71 +179,42 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		else
 			-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
 			-- lastPinResponse = tonumber(listener.response)
-			print('Verifying pin#' .. pinNumber)
+			print('4. Verifying pin# ' .. pinNumber)
+
 			local assumedStatus = newStatus
+
 			local body = "pass=abcd4321&pinNum=" .. pinNumber
 			local params = {}
 			params.body = body
 
 			local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
 			network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
-		-- 	print("Updating Button")
-		-- 	aButton:removeSelf()
-		-- 	-- if(lastPin == pinNumber) then
-		-- 	local defaultFileLocation
-		-- 	local overFileLocation
-
-		-- 	if(newStatus == 0) then
-		-- 		defaultFileLocation = "imgs/pushButton.png"
-		-- 		overFileLocation = "imgs/pushButton-over.png"
-		-- 	else
-		-- 		defaultFileLocation = "imgs/pushButtonOn.png"
-		-- 		overFileLocation = "imgs/pushButton-overOn.png"
-		-- 	end
-
-		-- 	aButton = widget.newButton{
-		-- 		defaultFile= defaultFileLocation,
-		-- 		overFile= overFileLocation,
-		-- 		width=getOnOffButtonWidth(),
-		-- 		height=getOnOffButtonHeight(),
-		-- 		-- onRelease = function() return togglePins(lightGroupOne, btn0, 5) end
-
-		-- 		onRelease = function() return togglePin(aGroup, aButton, pinNumber) end
-		-- 	}
-
-		-- aButton.anchorX = 0
-		-- aButton.anchorY = 0
-		-- aButton.x = getOnOffButtonXCoordinate()
-		-- aButton.y = getOnOffButtonYCoordinate()
-
-		-- aGroup:insert(aButton)
-		-- allControlsGroup:insert(aGroup)
-
-		-- setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, tonumber(returnEvent.response))			
-		--want to get this working from this method so buttons are updated as soon as the server replies
-		--will need to rearrange functions, etc. probably
-
-		-- local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
-		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. theState, "POST", networkListener)
-
 		return true
 	end
 end
 
 
 
+
+--2. gets the current status
+-- next layer in the stack
+--this gets the current status of a pin
+--then makes a request to set the pin to the
+--opposite status (eg. if off, then on)
 local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, togglePin)
 	if(listener.isError) then
 		print("Network Error")
 		return false
 	else
-		print("Current status (on/off): " .. listener.response)
+		print("2. Current status " .. listener.response)
 		local newStatus = tonumber(listener.response)
 		if(newStatus == 1) then
 			newStatus = 0
 		else
 			newStatus = 1
 		end
+
+		print("3. New status " .. newStatus)
 
 		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus
 		local params = {}
@@ -273,10 +231,13 @@ end
 
 
 
-
-
+--1. starts here
+--CALL THIS FUNCTION TO BEGIN PIN TOGGLE
+--THIS FUNCTION INITIATES A STACK OF FUNCTIONS
+--EACH CONTINUING FROM THE PREVIOUS SERVER RESULT
+--MESSY BUT WORKS DUE TO asynchronous WEB REQUESTS
 local function togglePin(aGroup, aButton, pinNumber)
-	print('Toggling pin#' .. pinNumber)
+	print('\n\n\n1. Toggling pin# ' .. pinNumber)
 	
 	local body = "pass=abcd4321&pinNum=" .. pinNumber
 	local params = {}
@@ -288,75 +249,8 @@ local function togglePin(aGroup, aButton, pinNumber)
 
 end
 
+---------------------------------------------NETWORK REQUEST STUFF --------------------------------------------------------------
 
-
-
-
-
---toggles the specified pin
--- local function togglePin(pin)
--- 	print("Pin: " .. pin .. " toggled")
--- 	network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
--- 	return true	-- indicates successful touch
--- end
-
--- --asks for the pin status
--- local function sendForPinStatus(aGroup, aButton, pinNumber)
--- 	print("Getting pin status for\t" .. pinNumber)
--- 	lastPin = pin
--- 	local networkListener = function(returnEvent) return networkListenerPinStatus(returnEvent, aGroup, aButton, pinNumber) end 	--wrapper so parameters can be passed
--- 	network.request("http://cpsc.xthon.com/getPin.php?pinNum=" .. pinNumber, "POST", networkListener)
--- end
-
--- --sets the button icon based on whether the pin is already on or off
--- local function setButtonBasedOnPinStatus(aGroup, aButton, pinNumber, result)
--- 	print("Updating Button")
--- 	aButton:removeSelf()
--- 	-- if(lastPin == pinNumber) then
--- 		local defaultFileLocation
--- 		local overFileLocation
-
--- 		if(lastPinResponse == 0) then
--- 			defaultFileLocation = "imgs/pushButton.png"
--- 			overFileLocation = "imgs/pushButton-over.png"
--- 		else
--- 			defaultFileLocation = "imgs/pushButtonOn.png"
--- 			overFileLocation = "imgs/pushButton-overOn.png"
--- 		end
-
--- 		aButton = widget.newButton{
--- 		defaultFile= defaultFileLocation,
--- 		overFile= overFileLocation,
--- 		width=getOnOffButtonWidth(),
--- 		height=getOnOffButtonHeight(),
--- 		onRelease = function()  
--- 						togglePin(5) 
--- 						sendForPinStatus(aGroup, aButton, 5)
--- 						print("WAITING SECONDS")
--- 						local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
--- 							timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
--- 					end
--- 		}
-
--- 		aButton.anchorX = 0
--- 		aButton.anchorY = 0
--- 		aButton.x = getOnOffButtonXCoordinate()
--- 		aButton.y = getOnOffButtonYCoordinate()
-
--- 		aGroup:insert(aButton)
--- 		allControlsGroup:insert(aGroup)
--- 	-- end
--- end
-
--- --updates the icon/state of the button passed in
--- local function updateButtonState(aGroup, aButton, pinNumber)
--- 	togglePin(pinNumber) 
--- 	-- (aGroup, aButton, pinNumber)
--- 	sendForPinStatus(aGroup, aButton, pinNumber)
--- 	print("WAITING SECONDS")		--wait so many seconds for the server to respond
--- 	local pinStatusClosure = function() return setButtonBasedOnPinStatus(aGroup, aButton, pinNumber) end
--- 	timer.performWithDelay(pinCheckTimeout, pinStatusClosure)
--- end
 
 function scene:create( event )
 
@@ -440,7 +334,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupTwo, btn1, 5) end
+			onRelease = function() return togglePin(lightGroupTwo, btn1, 1) end
 			
 		}
 		btn1.anchorX = 0
@@ -479,7 +373,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupThree, btn2, 2) end
+			onRelease = function() return togglePin(lightGroupThree, btn2, 2) end
 		}
 		btn2.anchorX = 0
 		btn2.anchorY = 0
@@ -518,7 +412,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupFour, btn3, 3) end
+			onRelease = function() return togglePin(lightGroupFour, btn3, 3) end
 		}
 		btn3.anchorX = 0
 		btn3.anchorY = 0
@@ -554,7 +448,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupFive, btn4, 4) end
+			onRelease = function() return togglePin(lightGroupFive, btn4, 4) end
 		}
 		btn4.anchorX = 0
 		btn4.anchorY = 0
@@ -588,7 +482,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupSix, btn5, 15) end
+			onRelease = function() return togglePin(lightGroupSix, btn5, 15) end
 		}
 		btn5.anchorX = 0
 		btn5.anchorY = 0
@@ -629,7 +523,7 @@ function scene:create( event )
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return updateButtonState(lightGroupSeven, btn6, 16) end
+			onRelease = function() return togglePin(lightGroupSeven, btn6, 16) end
 		}
 		btn6.anchorX = 0
 		btn6.anchorY = 0
