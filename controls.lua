@@ -166,6 +166,11 @@ end
 
 
 
+
+
+
+
+
 --3. sets the current status
 -- next layer in the stack
 -- this gets a pass/fail from the server
@@ -231,7 +236,7 @@ end
 
 
 
---1. starts here
+--1.0 starts here
 --CALL THIS FUNCTION TO BEGIN PIN TOGGLE
 --THIS FUNCTION INITIATES A STACK OF FUNCTIONS
 --EACH CONTINUING FROM THE PREVIOUS SERVER RESULT
@@ -247,6 +252,19 @@ local function togglePin(aGroup, aButton, pinNumber)
 	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
 	-- network.request("http://cpsc.xthon.com/getPin.php?pass=abcd4321&pinNum=" .. pinNumber, "POST", networkListener)
 
+end
+
+
+--1.1 this is called to initialize all the buttons to
+--the correct state on screen load
+local function initializeButtonStatus(aGroup, aButton, pinNumber)
+	print("0. Initializing button-pin state # " .. pinNumber)
+	local body = "pass=abcd4321&pinNum=" .. pinNumber
+	local params = {}
+	params.body = body
+	local assumedStatus = 0
+	local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
+			network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
 end
 
 ---------------------------------------------NETWORK REQUEST STUFF --------------------------------------------------------------
@@ -305,8 +323,7 @@ function scene:create( event )
 		btn0.y = getOnOffButtonYCoordinate()
 		lightGroupOne:insert(btn0)
 		allControlsGroup:insert(lightGroupOne)
-
-		-- updateButtonState(lightGroupOne, btn0, 5) 
+		initializeButtonStatus(lightGroupOne, btn0, 5)
 		--button state is initially off and this checks the server for actual state on screen load
 		
 
@@ -343,7 +360,7 @@ function scene:create( event )
 		btn1.y = getOnOffButtonYCoordinate()
 	lightGroupTwo:insert(btn1)
 	allControlsGroup:insert(lightGroupTwo)
-	-- updateButtonState(lightGroupTwo, btn1, 5)
+	initializeButtonStatus(lightGroupTwo, btn1, 1)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -381,7 +398,7 @@ function scene:create( event )
 		btn2.y = getOnOffButtonYCoordinate()
 	lightGroupThree:insert(btn2)
 	allControlsGroup:insert(lightGroupThree)
-	-- updateButtonState(lightGroupThree, btn2, 2)
+	initializeButtonStatus(lightGroupThree, btn2, 2)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -420,7 +437,7 @@ function scene:create( event )
 		btn3.y = getOnOffButtonYCoordinate()
 	lightGroupFour:insert(btn3)
 	allControlsGroup:insert(lightGroupFour)
-	-- updateButtonState(lightGroupFour, btn3, 3)
+	initializeButtonStatus(lightGroupFour, btn3, 3)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -456,7 +473,7 @@ function scene:create( event )
 		btn4.y = getOnOffButtonYCoordinate()
 	lightGroupFive:insert(btn4)	
 	allControlsGroup:insert(lightGroupFive)
-	-- updateButtonState(lightGroupFive, btn4, 4)
+	initializeButtonStatus(lightGroupFive, btn4, 4)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -490,7 +507,7 @@ function scene:create( event )
 		btn5.y = getOnOffButtonYCoordinate()
 	lightGroupSix:insert(btn5)
 	allControlsGroup:insert(lightGroupSix)
-	-- updateButtonState(lightGroupSix, btn5, 15) 
+	initializeButtonStatus(lightGroupSix, btn5, 15)
 	--button state is initially off and this checks the server for actual state on screen load
 
 
@@ -531,7 +548,7 @@ function scene:create( event )
 		btn6.y = getOnOffButtonYCoordinate()
 	lightGroupSeven:insert(btn6)
 	allControlsGroup:insert(lightGroupSeven)	
-	-- updateButtonState(lightGroupSeven, btn6, 16)
+	initializeButtonStatus(lightGroupSeven, btn6, 16)
 	--button state is initially off and this checks the server for actual state on screen load
 
 	
