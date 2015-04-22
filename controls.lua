@@ -15,9 +15,6 @@ local contentHeight = display.contentHeight
 local btnWidth = contentWidth * .45
 local btnHeight = contentHeight * .08
 local allControlsGroup = display.newGroup()
-local lastPinResponse = -1			--the last pin checked
-local lastPin = -1					--true/false; did we get an actual response back
-local pinCheckTimeout = 2000	--time to wait for pin response
 
 
 
@@ -221,7 +218,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 
 		print("3. New status " .. newStatus)
 
-		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus
+		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state=" .. newStatus
 		local params = {}
 		params.body = body
 
@@ -275,11 +272,16 @@ function scene:create( event )
 	sceneGroup = self.view	
 	titleText1 = display.newText( "Controls", contentWidth * .5, contentHeight*.04, getApplianceNameFont() ,contentHeight * .065)
 	sceneGroup:insert(titleText1)
-	-- local allControlsGroup = display.newGroup()
-   
+  	local lightGroupTable = {}			--holds each group of lights
+	local lightNames = {				--name of lights; adding name here will add the light (pin number assumingly increments by one)
+			"Living Room",
+			"Kitchen",
+			"Mud-room",
+			"Bedroom"
+		}
 
-	-- Create the widget
-	local scrollView = widget.newScrollView
+	
+	local scrollView = widget.newScrollView		--allows us to scroll
 	{
 		top = 0,
 		left = 0,
@@ -295,262 +297,42 @@ function scene:create( event )
 	sceneGroup:insert(scrollView)
 
 	
-   	local lightGroupOne = display.newGroup()
-	   	lightGroupOne.x = 0
-	   	lightGroupOne.y = getControlGroupingYCoordinate(0)
-	   	sceneGroup:insert(lightGroupOne)
-	 	backgroundOne = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	backgroundOne.width = contentWidth
-	 	backgroundOne.height = getControlBackgroundHeight()
-	 	lightGroupOne:insert( backgroundOne )
+	local numberLights = table.maxn(lightNames)		--get the number of lights in the table
+	for i = 1, numberLights, 1 do 					--create the lights in a loop
+		local currentGroup = lightGroupTable[i]
+			currentGroup = display.newGroup()
+			currentGroup.x = 0
+			currentGroup.y = getControlGroupingYCoordinate(i-1)
+		-- sceneGroup:insert(currentGroup)
 
-	 	local lightNameOne = display.newText( "Light 000", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundOne) )
-	 	lightNameOne:setTextColor( 0, 0, 0, 255 )
-	 	lightNameOne.x = getApplianceNameTextXCoordinate(lightNameOne)
-	 	lightGroupOne:insert(lightNameOne)
+		local background = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
+			background.width = contentWidth
+			background.height = getControlBackgroundHeight()
+		currentGroup:insert(background)
 
+		local lightName = display.newText( lightNames[i], 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(background) )
+			lightName:setTextColor( 0, 0, 0, 255 )
+ 			lightName.x = getApplianceNameTextXCoordinate(lightName)
+ 		currentGroup:insert(lightName)
 
-		btn0 = widget.newButton{
+ 		button = widget.newButton{
 			defaultFile="imgs/pushButton.png",
 			overFile="imgs/pushButton-over.png",
 			width=getOnOffButtonWidth(),
 			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupOne, btn0, 5) end
+			onRelease = function() return togglePin(currentGroup, button, i) end
 		}
-		btn0.anchorX = 0
-		btn0.anchorY = 0
-		btn0.x = getOnOffButtonXCoordinate()
-		btn0.y = getOnOffButtonYCoordinate()
-		lightGroupOne:insert(btn0)
-		allControlsGroup:insert(lightGroupOne)
-		initializeButtonStatus(lightGroupOne, btn0, 5)
-		--button state is initially off and this checks the server for actual state on screen load
-		
+		button.anchorX = 0
+		button.anchorY = 0
+		button.x = getOnOffButtonXCoordinate()
+		button.y = getOnOffButtonYCoordinate()
 
-
-
-
-   	local lightGroupTwo = display.newGroup()
-	   	lightGroupTwo.x = 0
-	   	lightGroupTwo.y = getControlGroupingYCoordinate(1)
-	   	sceneGroup:insert(lightGroupTwo)
-	 	backgroundTwo = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundTwo.width = contentWidth
-	 	backgroundTwo.height = getControlBackgroundHeight()
-	 	lightGroupTwo:insert( backgroundTwo )
-
-	 	local lightNameTwo = display.newText( "Light 001", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundTwo) )
-	 	lightNameTwo:setTextColor( 0, 0, 0, 255 )
-	 	lightNameTwo.x = getApplianceNameTextXCoordinate(lightNameTwo)
-	 	lightGroupTwo:insert(lightNameTwo)
-
-
-		btn1 = widget.newButton{
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupTwo, btn1, 1) end
-			
-		}
-		btn1.anchorX = 0
-		btn1.anchorY = 0
-		btn1.x = getOnOffButtonXCoordinate()
-		btn1.y = getOnOffButtonYCoordinate()
-	lightGroupTwo:insert(btn1)
-	allControlsGroup:insert(lightGroupTwo)
-	initializeButtonStatus(lightGroupTwo, btn1, 1)
-	--button state is initially off and this checks the server for actual state on screen load
-
-
-
-
-	local lightGroupThree = display.newGroup()
-	   	lightGroupThree.x = 0
-	   	lightGroupThree.y = getControlGroupingYCoordinate(2)
-	   	sceneGroup:insert(lightGroupThree)
-	 	backgroundThree = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundThree.width = contentWidth
-	 	backgroundThree.height = getControlBackgroundHeight()
-	 	lightGroupThree:insert( backgroundThree )
-
-	 	local lightNameThree = display.newText( "Light 010", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundThree) )
-	 	lightNameThree:setTextColor( 0, 0, 0, 255 )
-	 	lightNameThree.x = getApplianceNameTextXCoordinate(lightNameThree)
-	 	lightGroupThree:insert(lightNameThree)
-
-
-		btn2 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupThree, btn2, 2) end
-		}
-		btn2.anchorX = 0
-		btn2.anchorY = 0
-		btn2.x = getOnOffButtonXCoordinate()
-		btn2.y = getOnOffButtonYCoordinate()
-	lightGroupThree:insert(btn2)
-	allControlsGroup:insert(lightGroupThree)
-	initializeButtonStatus(lightGroupThree, btn2, 2)
-	--button state is initially off and this checks the server for actual state on screen load
-
-
-
+		currentGroup:insert(button)
+		allControlsGroup:insert(currentGroup)
+		initializeButtonStatus(currentGroup, button, i)
+	end
 
 	
-	local lightGroupFour = display.newGroup()
-	   	lightGroupFour.x = 0
-	   	lightGroupFour.y = getControlGroupingYCoordinate(3)
-	   	sceneGroup:insert(lightGroupFour)
-	 	backgroundFour = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundFour.width = contentWidth
-	 	backgroundFour.height = getControlBackgroundHeight()
-	 	lightGroupFour:insert( backgroundFour )
-
-	 	local lightNameFour = display.newText( "Light 011", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundFour) )
-	 	lightNameFour:setTextColor( 0, 0, 0, 255 )
-	 	lightNameFour.x = getApplianceNameTextXCoordinate(lightNameFour)
-	 	lightGroupFour:insert(lightNameFour)
-
-
-		btn3 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupFour, btn3, 3) end
-		}
-		btn3.anchorX = 0
-		btn3.anchorY = 0
-		btn3.x = getOnOffButtonXCoordinate()
-		btn3.y = getOnOffButtonYCoordinate()
-	lightGroupFour:insert(btn3)
-	allControlsGroup:insert(lightGroupFour)
-	initializeButtonStatus(lightGroupFour, btn3, 3)
-	--button state is initially off and this checks the server for actual state on screen load
-
-
-
-
-
-	local lightGroupFive = display.newGroup()
-	   	lightGroupFive.x = 0
-	   	lightGroupFive.y = getControlGroupingYCoordinate(4)
-	   	sceneGroup:insert(lightGroupFive)
-	 	backgroundFive = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundFive.width = contentWidth
-	 	backgroundFive.height = getControlBackgroundHeight()
-	 	lightGroupFive:insert( backgroundFive )
-
-	 	local lightNameFive = display.newText( "Cooling", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundFive) )
-	 	lightNameFive:setTextColor( 0, 0, 0, 255 )
-	 	lightNameFive.x = getApplianceNameTextXCoordinate(lightNameFive)
-	 	lightGroupFive:insert(lightNameFive)
-
-
-		btn4 = widget.newButton{
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupFive, btn4, 4) end
-		}
-		btn4.anchorX = 0
-		btn4.anchorY = 0
-		btn4.x = getOnOffButtonXCoordinate()
-		btn4.y = getOnOffButtonYCoordinate()
-	lightGroupFive:insert(btn4)	
-	allControlsGroup:insert(lightGroupFive)
-	initializeButtonStatus(lightGroupFive, btn4, 4)
-	--button state is initially off and this checks the server for actual state on screen load
-
-
-
-	local lightGroupSix = display.newGroup()
-	   	lightGroupSix.x = 0
-	   	lightGroupSix.y = getControlGroupingYCoordinate(5)
-	   	sceneGroup:insert(lightGroupSix)
-	 	backgroundSix = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundSix.width = contentWidth
-	 	backgroundSix.height = getControlBackgroundHeight()
-	 	lightGroupSix:insert( backgroundSix )
-
-	 	local lightNameSix = display.newText( "Heating", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundSix) )
-	 	lightNameSix:setTextColor( 0, 0, 0, 255 )
-	 	lightNameSix.x = getApplianceNameTextXCoordinate(lightNameSix)
-	 	lightGroupSix:insert(lightNameSix)
-
-
-		btn5 = widget.newButton{
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupSix, btn5, 15) end
-		}
-		btn5.anchorX = 0
-		btn5.anchorY = 0
-		btn5.x = getOnOffButtonXCoordinate()
-		btn5.y = getOnOffButtonYCoordinate()
-	lightGroupSix:insert(btn5)
-	allControlsGroup:insert(lightGroupSix)
-	initializeButtonStatus(lightGroupSix, btn5, 15)
-	--button state is initially off and this checks the server for actual state on screen load
-
-
-
-
-
-
-
-	local lightGroupSeven = display.newGroup()
-	   	lightGroupSeven.x = 0
-	   	lightGroupSeven.y = getControlGroupingYCoordinate(6)
-	   	sceneGroup:insert(lightGroupSeven)
-	 	backgroundSeven = display.newImage( "imgs/on_off_background.png", getControlBackgroundXCoordinate(), 0 )
-	 	-- backgroundOne:scale( contentWidth, (0.1))
-	 	backgroundSeven.width = contentWidth
-	 	backgroundSeven.height = getControlBackgroundHeight()
-	 	lightGroupSeven:insert( backgroundSeven )
-
-	 	local lightNameSeven = display.newText( "Fan", 0, 0, getApplianceNameFont(), getApplianceNameTextHeight(backgroundSeven) )
-	 	lightNameSeven:setTextColor( 0, 0, 0, 255 )
-	 	lightNameSeven.x = getApplianceNameTextXCoordinate(lightNameSeven)
-	 	lightGroupSeven:insert(lightNameSeven)
-
-
-		btn6 = widget.newButton{
-			-- label="Light 1",
-			-- fontSize = contentWidth * .05,
-			-- labelColor = { default={255}, over={128} },
-			defaultFile="imgs/pushButton.png",
-			overFile="imgs/pushButton-over.png",
-			width=getOnOffButtonWidth(),
-			height=getOnOffButtonHeight(),
-			onRelease = function() return togglePin(lightGroupSeven, btn6, 16) end
-		}
-		btn6.anchorX = 0
-		btn6.anchorY = 0
-		btn6.x = getOnOffButtonXCoordinate()
-		btn6.y = getOnOffButtonYCoordinate()
-	lightGroupSeven:insert(btn6)
-	allControlsGroup:insert(lightGroupSeven)	
-	initializeButtonStatus(lightGroupSeven, btn6, 16)
-	--button state is initially off and this checks the server for actual state on screen load
-
 	
 local tabButtons = {
     {
@@ -618,15 +400,6 @@ function scene:show( event )
 
    if ( phase == "will" ) then
    	allControlsGroup.isVisible = true
-		-- titleText1.isVisible = true
-		-- btn0.isVisible = true
-		-- btn1.isVisible = true
-		-- btn2.isVisible = true
-		-- btn3.isVisible = true
-		-- btn4.isVisible = true
-		-- btn5.isVisible = true
-		-- btn6.isVisible = true
-      -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
       -- Called when the scene is now on screen.
       -- Insert code here to make the scene come alive.
@@ -642,14 +415,6 @@ function scene:hide( event )
 
    if ( phase == "will" ) then
    		allControlsGroup.isVisible = false
-   		-- titleText1.isVisible = false
-   		-- btn0.isVisible = false
-		-- btn1.isVisible = false
-		-- btn2.isVisible = false
-		-- btn3.isVisible = false
-		-- btn4.isVisible = false
-		-- btn5.isVisible = false
-		-- btn6.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -663,23 +428,6 @@ function scene:destroy( event )
 
    local sceneGroup = self.view
    allControlsGroup:removeSelf()
-   -- allControlsGroup = nil
-	-- titleText1:removeSelf()
-	-- titleText1 = nil
-	-- btn0:removeSelf()
-	-- btn0 = nil
-	-- btn1:removeSelf()
-	-- btn1 = nil
-	-- btn2:removeSelf()
-	-- btn2 = nil
-	-- btn3:removeSelf()
-	-- btn3 = nil
-	-- btn4:removeSelf()
-	-- btn4 = nil
-	-- btn5:removeSelf()
-	-- btn5 = nil
-	-- btn6:removeSelf()
-	-- btn6 = nil
    -- Called prior to the removal of scene's view ("sceneGroup").
    -- Insert code here to clean up the scene.
    -- Example: remove display objects, save state, etc.
