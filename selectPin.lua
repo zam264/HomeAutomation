@@ -20,9 +20,7 @@ local options = {
 	"2",
 	"3",
 	"4",
-	"Cool",
-	"Heat",
-	"Fan"
+	"F"
 }
 
 local function onOptionSelect(x)

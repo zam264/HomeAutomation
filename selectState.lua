@@ -16,8 +16,8 @@ local btnWidth = contentWidth * .2
 local btnHeight = contentWidth * .2
 local optionBtns = {}
 local options = {
-	"On",
-	"Off"
+	"I",
+	"O"
 }
 
 local function onOptionSelect(x)

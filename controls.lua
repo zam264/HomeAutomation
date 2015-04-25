@@ -175,23 +175,23 @@ end
 -- then makes a request to verify that the new
 -- pin status we wanted is the current pin status
 local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
-		if(listener.isError) then
-			print("Network Error")
-			return false
-		else
-			-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
-			-- lastPinResponse = tonumber(listener.response)
-			print('4. Verifying pin# ' .. pinNumber)
+	if(listener.isError) then
+		print("Network Error")
+		return false
+	else
+		-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
+		-- lastPinResponse = tonumber(listener.response)
+		print('4. Verifying pin# ' .. pinNumber)
 
-			local assumedStatus = newStatus
+		local assumedStatus = newStatus
 
-			local body = "pass=abcd4321&pinNum=" .. pinNumber
-			local params = {}
-			params.body = body
+		local body = "pass=abcd4321&pinNum=" .. pinNumber
+		local params = {}
+		params.body = body
 
-			local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-			network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
-		return true
+		local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
+		network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+	return true
 	end
 end
 
