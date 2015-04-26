@@ -165,11 +165,11 @@ local function writeSchedule(schedule)
          elseif(light == "Kitchen") then
             parsedLights[i] = "2"
          elseif(light == "Mud-room") then
-            parsedLights = "3"
+            parsedLights[i] = "3"
          elseif(light == "Bedroom") then
-            parsedLights = "4"
+            parsedLights[i] = "4"
          elseif(light == "Fan") then
-            parsedLights = "F"
+            parsedLights[i] = "F"
          end
       end
 

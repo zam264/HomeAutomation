@@ -182,6 +182,70 @@ end
 
 
 
+local function updateLightsChosen(lightName)
+   local lightsChoice = lightsChoice.lightsChoice
+   if(lightsChoice[lightName] == false) then
+      lightsChoice[lightName] = true
+   else
+      lightsChoice[lightName] = false
+   end
+end
+
+local function updateOnOffChosen(isOff)
+   local isOffChoice = lightsChoice.isOffChoice
+   if(isOffChoice == true) then
+      isOffChoice = false
+   else
+      isOffChoice = true
+   end
+
+end
+
+
+local function updateDaysChosen(dayName)
+   local daysChoice = lightsChoice.daysChoice
+   if(daysChoice[dayName] == false) then
+      daysChoice[dayName] = true
+   else
+      daysChoice[dayName] = false
+   end
+end
+
+local function updateHourChosen(hour)
+   local hourChoice = lightsChoice.daysChoice
+   hourChoice = hour
+end
+
+
+local function updateAmPm(isAm)
+   local isAm = lightsChoice.isAm
+   if(isAm == true) then
+      isAm = false
+   else
+      isAm = true
+   end
+end
+
+
+local function updateMinute(minute)
+   local minuteChoice = lightsChoice.minuteChoice
+   minuteChoice = minute
+
+end
+
+local function createHoursAndMinutes(minuteChoices)
+   local numberHours = 12
+   for i = 1, numberHours, 1 do
+      hourOptions[i] = i
+   end
+
+   for i = 1, minuteChoices, 1 do
+      local minutesInHour = 60
+      local minuteChoice = (minutesInHour / minuteChoices) * (i-1)
+      minuteOptions[i] = minuteChoice
+   end
+end
+
 
 
 local function createAllButtons(eventHandler)
