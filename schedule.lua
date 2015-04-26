@@ -320,6 +320,8 @@ local function onClrBtn()
    file:write( "" )
    io.close( file )
    allControlsGroup:removeSelf()
+   allControlsGroup = display.newGroup()
+   events = {}
    --composer.removeScene("schedule")
 end
 
