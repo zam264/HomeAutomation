@@ -7,7 +7,6 @@ local schedule = require ("schedule")
 -- unless "composer.removeScene()" is called.
 ---------------------------------------------------------------------------------
 function scene:overlayBegan( event )
-   print("EVENT LISTENER PLS WERK")
    print( "The overlay scene is showing: " .. event.sceneName )
    print( "We get custom params too! " .. event.params.sample_var )
 end
@@ -183,70 +182,6 @@ end
 
 
 
-local function updateLightsChosen(lightName)
-   local lightsChoice = lightsChoice.lightsChoice
-   if(lightsChoice[lightName] == false) then
-      lightsChoice[lightName] = true
-   else
-      lightsChoice[lightName] = false
-   end
-end
-
-local function updateOnOffChosen(isOff)
-   local isOffChoice = lightsChoice.isOffChoice
-   if(isOffChoice == true) then
-      isOffChoice = false
-   else
-      isOffChoice = true
-   end
-
-end
-
-
-local function updateDaysChosen(dayName)
-   local daysChoice = lightsChoice.daysChoice
-   if(daysChoice[dayName] == false) then
-      daysChoice[dayName] = true
-   else
-      daysChoice[dayName] = false
-   end
-end
-
-local function updateHourChosen(hour)
-   local hourChoice = lightsChoice.daysChoice
-   hourChoice = hour
-end
-
-
-local function updateAmPm(isAm)
-   local isAm = lightsChoice.isAm
-   if(isAm == true) then
-      isAm = false
-   else
-      isAm = true
-   end
-end
-
-
-local function updateMinute(minute)
-   local minuteChoice = lightsChoice.minuteChoice
-   minuteChoice = minute
-
-end
-
-local function createHoursAndMinutes(minuteChoices)
-   local numberHours = 12
-   for i = 1, numberHours, 1 do
-      hourOptions[i] = i
-   end
-
-   for i = 1, minuteChoices, 1 do
-      local minutesInHour = 60
-      local minuteChoice = (minutesInHour / minuteChoices) * (i-1)
-      minuteOptions[i] = minuteChoice
-   end
-end
-
 
 
 local function createAllButtons(eventHandler)
@@ -259,6 +194,7 @@ local function createAllButtons(eventHandler)
       
       local numberButtons = table.maxn(currentOptions)
       for j = 1, numberButtons, 1 do
+
          currentButtons[j] = widget.newButton{
             label = currentOptions[j],
             fontSize = display.contentWidth * .05,
@@ -291,17 +227,7 @@ local function createAllButtons(eventHandler)
 end
 
 
-local function onOptionSelect(x)
-       
-    
-   --titleText1.text = titleText1.text .. "1"
-   scheduleString = lightNamesOptions[x] .. " "
-   local file = io.open( path, "a" )
-   file:write( lightNamesOptions[x] )
-   io.close( file )
-   composer.gotoScene( "selectState", {effect="fade", time=200}) 
-   return true -- indicates successful touch
-end
+
 
 
 local function updateSwitchButtonState(theButton, eventHandler, currentScroller, buttonsGroup)
@@ -313,39 +239,52 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
    local buttonWidth 
    local canSelectMultiple
 
-   -- if(theButton.canSelectMultiple == false) then
-   --    print(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>")
-   --    local numberButtons = table.maxn(buttonsGroup) 
-   --    for i = 1, numberButtons, 1 do
-   --       if(buttonsGroup[i].isButtonSelected == true) then
-   --          print("LE BUTTON SELECTED")
-   --          theLabel = buttonsGroup[i].buttonText
-   --          xPosition = buttonsGroup[i].x
-   --          canSelectMultiple = buttonsGroup[i].canSelectMultiple
-   --          buttonWidth = buttonsGroup[i].width
-   --          buttonsGroup[i]:removeSelf()
-   --          buttonsGroup[i] = widget.newButton{
-   --             label = theLabel,
-   --             fontSize = display.contentWidth * .05,
-   --             labelColor = { default={255}, over={128} },
-   --             defaultFile="imgs/button.png",
-   --             overFile="imgs/button_over.png",
-   --             width=buttonWidth, 
-   --             height=btnHeight,
+   if(theButton.canSelectMultiple == false and theButton.isButtonSelected == false) then
+      local numberButtons = table.maxn(buttonsGroup) 
+      for i = 1, numberButtons, 1 do
+         if(buttonsGroup[i].isButtonSelected  and buttonsGroup[i] ~= theButton) then
+            local tempButton = buttonsGroup[i]
 
-   --             onEvent = function(event) return eventHandler(event, buttonsGroup[i], currentScroller) end,
-   --          }
-   --          buttonsGroup[i].anchorX = 0
-   --          buttonsGroup[i].anchorY = 0
-   --          buttonsGroup[i].x = xPosition
-   --          buttonsGroup[i].buttonText = theLabel
-   --          buttonsGroup[i].y = 0
-   --          buttonsGroup[i].isButtonSelected = newButtonSelectedState
-   --          buttonsGroup[i].canSelectMultiple = canSelectMultiple
-   --          currentScroller:insert(buttonsGroup[i])
-   --       end
-   --    end
-   -- end 
+              local tableSize = table.maxn(buttonsGroup)
+              local position = 1
+               for i = 1, tableSize, 1 do
+                  if(theButton == buttonsGroup[i]) then
+                     table.remove(buttonsGroup, i)
+                     position = i
+                     tempButton:removeSelf()
+                     break
+                  end
+               end
+            -- tempButton:removeSelf()
+            theLabel = tempButton.buttonText
+            xPosition = tempButton.x
+            canSelectMultiple = tempButton.canSelectMultiple
+            buttonWidth = tempButton.width
+
+            tempButton = widget.newButton{
+               label = theLabel,
+               fontSize = display.contentWidth * .05,
+               labelColor = { default={255}, over={128} },
+               defaultFile="imgs/button.png",
+               overFile="imgs/button_over.png",
+               width=buttonWidth, 
+               height=btnHeight,
+
+               onEvent = function(event) return eventHandler(event, tempButton, currentScroller, buttonsGroup) end,
+            }
+
+            tempButton.anchorX = 0
+            tempButton.anchorY = 0
+            tempButton.x = xPosition
+            tempButton.buttonText = theLabel
+            tempButton.y = 0
+            tempButton.isButtonSelected = false
+            tempButton.canSelectMultiple = false
+            currentScroller:insert(tempButton)
+            table.insert(buttonsGroup, position, tempButton)
+         end
+      end
+   end 
 
    if theButton.isButtonSelected == true then
       defaultFileLocation = "imgs/button.png"
@@ -362,7 +301,20 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
    canSelectMultiple = theButton.canSelectMultiple
    buttonWidth = theButton.width
 
-   theButton:removeSelf()
+   
+   local tableSize = table.maxn(buttonsGroup)
+   local position = 1
+   for i = 1, tableSize, 1 do
+      if(theButton == buttonsGroup[i]) then
+         table.remove(buttonsGroup, i)
+         position = i
+         theButton:removeSelf()
+         break
+      end
+   end
+
+
+   
    theButton = widget.newButton{
       label = theLabel,
       fontSize = display.contentWidth * .05,
@@ -372,7 +324,7 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
       width=buttonWidth, 
       height=btnHeight,
 
-      onEvent = function(event) return eventHandler(event, theButton, currentScroller) end,
+      onEvent = function(event) return eventHandler(event, theButton, currentScroller, buttonsGroup) end,
    }
 
    theButton.anchorX = 0
@@ -383,6 +335,8 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
    theButton.isButtonSelected = newButtonSelectedState
    theButton.canSelectMultiple = canSelectMultiple
    currentScroller:insert(theButton)
+   table.insert(buttonsGroup, position, theButton)
+
 
    -- table.insert(selections, theButton.buttonText = theButton.isButtonSelected)
 end
@@ -405,6 +359,7 @@ local function handleButtonEvent(event, theButton, scroller, buttonsGroup)
         return true
     -- end
     elseif (phase == "ended") then
+    -- print(theButton.isButtonSelected)
       updateSwitchButtonState(theButton, handleButtonEvent, scroller, buttonsGroup)
        -- onOptionSelect(x)
        return false
@@ -425,6 +380,99 @@ local function createCancelDoneButtons(sceneGroup)
 
       onRelease = function(event)
          -- composer.gotoScene( "schedule", {effect="fade", time=200})
+         -- local buttonGroups = table.maxn(allButtons)
+         -- for j = 1, buttonGroups, 1 do
+         --    local buttonsGroup = selections[j]
+         -- print("PARSING CHOICES")
+         --LIGHT NAMES
+            local buttonsInGroup = table.maxn(lightButtons)
+            -- print("NUMLIGHTS\t" .. tostring(buttonsInGroup))
+            for j = 1, buttonsInGroup, 1 do
+               local currentButton = lightButtons[j]
+               -- local lb = allButtons[1]
+               -- local currentButton = lb[j]
+
+               local isSelected = currentButton.isButtonSelected
+               local currentTable = selections.lightsChosen
+               -- print(isSelected)
+               -- print(currentButton.buttonText)
+               -- print(currentButton.defaultFile)
+               if(isSelected == true) then
+                  print(currentButton.buttonText)
+                  table.insert( currentTable, currentButton.buttonText )
+               end
+            end 
+
+         --ON OR OFF SELECTED FOR LIGHTS
+            local onButton = stateButtons[1].isButtonSelected
+            local offButton = stateButtons[2].isButtonSelected
+            local size = table.maxn(stateButtons)
+            -- if(onButton ~= offButton) then
+               if(onButton) then
+                  -- print("ON LIGHT")
+                  selections.isOnChosen = true
+               else
+                  selections.isOnChosen = false
+                  -- print("OFF LIGHT")
+               end
+            -- end
+
+         --DAYS CHOSEN FOR BUTTONS
+            local buttonsInGroup = table.maxn(dayButtons)
+            for j = 1, buttonsInGroup, 1 do
+               local currentButton = dayButtons[j]
+               local isSelected = currentButton.isButtonSelected
+               local currentTable = selections.daysChosen
+               if(isSelected) then
+                  table.insert(currentTable, currentButton.buttonText)
+               end
+            end
+
+         --HOUR CHOSEN FOR BUTTON
+            local buttonsInGroup = table.maxn(hourButtons)
+            print(buttonsInGroup)
+            for j = 1, buttonsInGroup, 1 do
+               -- print("SEARCHING 4 HOURS")
+               local currentButton = hourButtons[j]
+               local isSelected = currentButton.isButtonSelected
+               local currentChoice = selections.hourChosen
+               if(isSelected) then
+                  currentChoice = currentButton.buttonText
+                  -- print("FOUND AN HOUR<<<<<<<<<<<<<<<<<<")
+                  selections.hourChosen = currentChoice
+               end
+            end
+
+         --AM OR PM CHOSEN
+            local amButton = amPmButtons[1].isButtonSelected
+            -- local pmButton = amPmButtons[3].isButtonSelected
+            -- print(table.maxn(amPmButtons))
+            
+               -- if(amButton ~= pmButton) then
+                  if(amButton == true) then
+                     -- print("AM BUTTON")
+                     selections.isAmChosen = true
+                  elseif(amButton == false) then
+                      -- print("PM BUTTON")
+                     selections.isAmChosen = false
+                  end
+               -- end
+
+         --MINUTE CHOSEN
+         local buttonsInGroup = table.maxn(minuteButtons)
+            for j = 1, buttonsInGroup, 1 do
+               local currentButton = minuteButtons[j]
+               local isSelected = currentButton.isButtonSelected
+               local currentChoice = selections.minuteChosen
+               if(isSelected) then
+                  currentChoice = currentButton.buttonText
+                  selections.minuteChosen = currentChoice
+                  break
+               end
+            end
+
+
+
          composer.hideOverlay("fade", 400)
        end
    }
@@ -464,11 +512,10 @@ end
 
 
 function scene:enterScene( event )
-   print("WE IN HERE NIGGA")
-   local params = event.params
+   -- local params = event.params
 
-   print( params.var1 ) -- "custom data"
-   print( params.sample_var ) -- 123
+   -- print( params.var1 ) -- "custom data"
+   -- print( params.sample_var ) -- 123
 end
 
 
@@ -477,7 +524,7 @@ end
 function scene:create( event )
    --composer.getScene("menu"):destroy()
    -- print(event.params.sample_var .. "\tPAREMS PLS")
-   lightsChoice = event.params
+   selections = event.params
    local sceneGroup = self.view
    sceneGroup:insert(background)
    titleText = display.newText( "Select options", contentWidth * .5, contentHeight*.05, native.systemFont ,contentHeight * 0.05)   
@@ -514,9 +561,12 @@ function scene:hide( event )
 
    local sceneGroup = self.view
    local phase = event.phase
+   local parent = event.parent
 
    if ( phase == "will" ) then
       controlButtonsGroup.isVisible = false
+      print(selections)
+      parent:captureChosenSchedule(selections)
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.

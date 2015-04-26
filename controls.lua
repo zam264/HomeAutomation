@@ -124,12 +124,12 @@ local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumb
 
 	-- else if(actualStatus == assumedStatus)  then
 		-- print("Current status (on/off): " .. listener.response)
-			print("5. Updating Button")
+			-- print("5. Updating Button")
 			aButton:removeSelf()
 			-- if(lastPin == pinNumber) then
 			local defaultFileLocation
 			local overFileLocation
-			print("6. Verifying status (actual,assumed) " .. actualStatus .. ',' .. assumedStatus)
+			-- print("6. Verifying status (actual,assumed) " .. actualStatus .. ',' .. assumedStatus)
 			if(actualStatus == 0) then
 				defaultFileLocation = "imgs/pushButton.png"
 				overFileLocation = "imgs/pushButton-over.png"
@@ -181,7 +181,7 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 	else
 		-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
 		-- lastPinResponse = tonumber(listener.response)
-		print('4. Verifying pin# ' .. pinNumber)
+		-- print('4. Verifying pin# ' .. pinNumber)
 
 		local assumedStatus = newStatus
 
@@ -208,7 +208,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		print("Network Error")
 		return false
 	else
-		print("2. Current status " .. listener.response)
+		-- print("2. Current status " .. listener.response)
 		local newStatus = tonumber(listener.response)
 		if(newStatus == 1) then
 			newStatus = 0
@@ -216,7 +216,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 			newStatus = 1
 		end
 
-		print("3. New status " .. newStatus)
+		-- print("3. New status " .. newStatus)
 
 		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state=" .. newStatus
 		local params = {}
@@ -239,7 +239,7 @@ end
 --EACH CONTINUING FROM THE PREVIOUS SERVER RESULT
 --MESSY BUT WORKS DUE TO asynchronous WEB REQUESTS
 local function togglePin(aGroup, aButton, pinNumber)
-	print('\n\n\n1. Toggling pin# ' .. pinNumber)
+	-- print('\n\n\n1. Toggling pin# ' .. pinNumber)
 	
 	local body = "pass=abcd4321&pinNum=" .. pinNumber
 	local params = {}
@@ -255,7 +255,7 @@ end
 --1.1 this is called to initialize all the buttons to
 --the correct state on screen load
 local function initializeButtonStatus(aGroup, aButton, pinNumber)
-	print("0. Initializing button-pin state # " .. pinNumber)
+	-- print("0. Initializing button-pin state # " .. pinNumber)
 	local body = "pass=abcd4321&pinNum=" .. pinNumber
 	local params = {}
 	params.body = body

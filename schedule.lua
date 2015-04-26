@@ -17,15 +17,15 @@ local verticalOffsetNew = contentHeight * .25
 local verticalOffsetStart = verticalOffsetNew --this acts as the start point for events list
 local events = {}
 local allControlsGroup = display.newGroup()
+-- allControlsGroup.anchorX = 0
+-- allControlsGroup.anchorY = 0
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
-function scene:overlayBegan( event )
-   print( "The overlay scene is showing: " .. event.sceneName )
-   print( "We get custom params too! " .. event.params.sample_var )
-end
 
-scene:addEventListener( "overlayBegan" )
+
+
+
 
 local scrollView = widget.newScrollView
    {
@@ -33,18 +33,226 @@ local scrollView = widget.newScrollView
       left = 0,
       width = contentWidth,
       scrollWidth = contentWidth,
-      -- height = contentHeight - 100,
-      -- scrollHeight = contentHeight - 300,
-      height = contentHeight - 400,
+      height = contentHeight - (400),
       scrollHeight = 0,
       listener = scrollListener,
       horizontalScrollDisabled = true,
-      -- hideBackground = true
       backgroundColor = { 1, 1, 1 }
-      -- isBounceEnabled = false
    }
-   scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
+
+
+local function showSchedule(schedule)
+   allControlsGroup:removeSelf()
+   allControlsGroup = display.newGroup()
+   scrollView:insert( allControlsGroup )
+   local buttonCounter = 0
+   local numberSpecificEvents = table.maxn(events)
+   for h = 1, numberSpecificEvents, 1 do
+      local daysChosenTable = events[h].daysChosen
+      local numberOfDays = table.maxn(daysChosenTable)
+      for i = 1, numberOfDays, 1 do                --create the lights in a loop
+         local lightsChosenTable = events[h].lightsChosen
+         local numberOfLights = table.maxn(lightsChosenTable)
+         -- print("IN LOOP")
+         for j = 1, numberOfLights, 1 do
+            local buttonNumber = i + j + h 
+            local currentGroup = display.newGroup()
+            buttonCounter = buttonCounter + 1
+               currentGroup.width = contentWidth
+               currentGroup.height = display.contentHeight * 0.1
+               currentGroup.anchorX = 0
+               currentGroup.anchorY = 0
+               currentGroup.x = 0
+               currentGroup.y = display.contentHeight * 0.1 * (buttonCounter - 1)
+               
+
+            local background = display.newImage( "imgs/on_off_background.png", 0, 0 )
+               background.width = contentWidth
+               background.height = display.contentHeight * 0.1
+               background.anchorX = 0
+               background.anchorY = 0
+               background.x = 0
+               background.y = display.contentHeight * 0.1 * (buttonCounter - 0)
+               -- background.y = 0
+            currentGroup:insert(background)
+
+            local lightName = display.newText(lightsChosenTable[j], 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+               lightName:setTextColor( 0, 0, 0, 255 )
+               -- lightName.anchorY = 0
+               -- lightName.anchorX = 0
+               lightName.x = (lightName.width / 2) + 40
+               lightName.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 )
+            currentGroup:insert(lightName)
+
+            local dayName = display.newText(daysChosenTable[i], 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+               dayName:setTextColor( 0, 0, 0, 255 )
+               -- lightName.anchorY = 0
+               -- lightName.anchorX = 0
+               dayName.x = ((dayName.width / 2) + 40)
+               dayName.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+            currentGroup:insert(dayName)
+
+            local hourString
+            if(tonumber(events[h].hourChosen) <= 9)then
+               hourString = "0" .. events[h].hourChosen
+            else
+               hourString = events[h].hourChosen
+            end
+            
+            local minuteString
+            if(tonumber(events[h].minuteChosen) <= 9) then
+               minuteString = "0" .. events[h].minuteChosen
+            else
+               minuteString = events[h].minuteChosen
+            end
+            local amPmString
+            if(events[h].isAmChosen) then
+               amPmString = "am"
+            else
+               amPmString = "pm"
+            end
+            local concatTime = hourString .. ":" .. minuteString .. amPmString
+            local theTime = display.newText(concatTime, 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+               theTime:setTextColor( 0, 0, 0, 255 )
+               -- lightName.anchorY = 0
+               -- lightName.anchorX = 0
+               theTime.x = (contentWidth - (theTime.width / 2))
+               theTime.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+            currentGroup:insert(theTime)
+
+
+
+
+
+
+            local boolState = events[h].isOnChosen
+            local stateString
+            if(boolState) then
+               stateString = "on"
+            elseif(boolState == false) then
+               stateString = "off"
+            end
+            local lightState = display.newText(stateString, 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+               lightState:setTextColor( 0, 0, 0, 255 )
+               -- lightName.anchorY = 0
+               -- lightName.anchorX = 0
+               lightState.x = (contentWidth - (dayName.width / 2))
+               lightState.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 )
+            currentGroup:insert(lightState)
+
+
+            -- currentGroup:insert(button)
+            allControlsGroup:insert(currentGroup)
+            -- initializeButtonStatus(currentGroup, button, i)
+         end
+      end
+   end
+
+
+end
+
+
+local function writeSchedule(schedule)
+
+   local parsedLights = {}
+   local lightsTable = schedule.lightsChosen
+      local numberLights = table.maxn(lightsTable)
+      for i = 1, numberLights, 1 do
+         local light = lightsTable[i]
+         if(light == "Living Room") then
+            parsedLights[i] = "1"
+         elseif(light == "Kitchen") then
+            parsedLights[i] = "2"
+         elseif(light == "Mud-room") then
+            parsedLights = "3"
+         elseif(light == "Bedroom") then
+            parsedLights = "4"
+         elseif(light == "Fan") then
+            parsedLights = "F"
+         end
+      end
+
+   
+
+   local parsedOnOff
+   local isOnChosen = schedule.isOnChosen
+      if(isOnChosen) then
+         parsedOnOff = "I"
+      elseif(isOnChosen == false) then
+         parsedOnOff = "O"
+      end
+
+
+   local parsedDays = {}
+   local daysChosen = schedule.daysChosen
+      local numberDays = table.maxn(daysChosen)
+      for i = 1, numberDays, 1 do
+         local longDayString = daysChosen[i]
+         local shortDayString = longDayString:sub(1,3)
+         parsedDays[i] = shortDayString
+      end
+
+
+   local parsedHour
+   local hourChosen = schedule.hourChosen
+      local theHour = schedule.hourChosen
+      local isAmChosen = schedule.isAmChosen
+
+      if(isAmChosen) then 
+         if(theHour == 12) then
+            parsedHour = "00"
+         elseif(theHour <= 9) then
+            parsedHour = "0" .. tostring( theHour )
+         else
+            parsedHour = tostring(theHour)
+         end
+      else
+         if(theHour == 12) then
+            parsedHour = tostring(theHour)
+         else
+            parsedHour = tostring(theHour + 12)
+         end
+      end
+
+
+
+
+   local parsedMinute
+   local minuteChosen = schedule.minuteChosen
+   if(minuteChosen == 0) then
+      parsedMinute = "00"
+   else
+      parsedMinute = tostring(minuteChosen)
+   end
+
+   local numberDays = table.maxn(parsedDays)
+   for i = 1, numberDays, 1 do
+      local numberLights = table.maxn(parsedLights)
+      for j = 1, numberLights, 1 do
+         print(parsedLights[j] .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n")
+         local file = io.open( path2, "a" )
+         file:write( scheduleString )
+         io.close( file )
+      end
+   end
+   
+
+
+
+
+
+
+end
+
+function scene:captureChosenSchedule(schedule)
+   table.insert( events, schedule ) 
+   print(table.maxn(events))
+   showSchedule(schedule)
+   writeSchedule(schedule)
+
+end
+
 
 
 local fhd = io.open( path )
@@ -84,10 +292,6 @@ end
 
 
 local function onAddBtn()
-   --titleText1.text = titleText1.text .. "1"
-   -- composer.gotoScene( "selectPin", {effect="fade", time=200})
-
-      -- composer.gotoScene( "addSchedule", {effect="fade", time=200})
 
    local options =
    {
@@ -95,6 +299,12 @@ local function onAddBtn()
    time = 400,
    isModal = true,
    params = {
+            lightsChosen = {},
+            isOnChosen = false,
+            daysChosen = {},
+            hourChosen = -1,
+            isAmChosen = false,
+            minuteChosen = -1
             }
    }
    composer.showOverlay( "addSchedule", options )
@@ -109,7 +319,7 @@ local function onClrBtn()
    local file = io.open( path2, "w" )
    file:write( "" )
    io.close( file )
-   refreshScreen()
+   allControlsGroup:removeSelf()
    --composer.removeScene("schedule")
 end
 
@@ -137,37 +347,7 @@ local function onPushBtn()
    print("PUSH")
 end
 
-function refreshScreen()
-   titleText1.text = "Most Recent Event"
-   local i = 1 --loop control variable
-   local j = #events
-   print(j)
-   if j > 0 then --check if there are any events to handle
-      --there are events, remove them and prepare to re-draw them
-      print("Handling events")
-      while i <= j do
-         events[i]:removeSelf()
-         events[i] = nil
-         i = i + 1 
-      end
-      verticalOffsetNew = verticalOffsetStart
-   end
-   --(re)populate events
-   local file = io.open( path2, "r" )     
-   i = 1
-   for line in file:lines() do
-      --if i % 4 == 0 then
-      events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew-200, native.systemFont ,contentHeight * .045)
-      -- sceneGroup:insert(events[i])
-      events[i]:setTextColor( 0,0,0 )
-      allControlsGroup:insert(events[i])
 
-      print( line )
-      verticalOffsetNew = verticalOffsetNew + verticalOffset 
-      i = i + 1
-   end
-      io.close(file)  
-end
 
 
 -- "scene:create()"
@@ -242,7 +422,8 @@ function scene:show( event )
    if ( phase == "will" ) then
       titleText1.isVisible = true
       addBtn.isVisible = true
-      refreshScreen()
+      showSchedule()
+      -- refreshScreen()
       allControlsGroup.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
    elseif ( phase == "did" ) then
@@ -260,6 +441,7 @@ function scene:hide( event )
    local sceneGroup = self.view
    -- local allControlsGroup.isVisible = false
    local phase = event.phase
+
 
    if ( phase == "will" ) then
          titleText1.isVisible = false
