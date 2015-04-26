@@ -9,7 +9,7 @@ local widget = require "widget"     -- include Corona's "widget" library
 display.setDefault( "background", .25 )
 -- local forward references should go here
 local titleText1, addBtn
-scheduleString = "Most Recent Event"
+scheduleString = " "
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
 local verticalOffset = contentHeight * .1
@@ -20,9 +20,16 @@ local allControlsGroup = display.newGroup()
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
+function scene:overlayBegan( event )
+   print( "The overlay scene is showing: " .. event.sceneName )
+   print( "We get custom params too! " .. event.params.sample_var )
+end
+
+scene:addEventListener( "overlayBegan" )
+
 local scrollView = widget.newScrollView
    {
-      top = 250,
+      top = display.contentHeight * .1,
       left = 0,
       width = contentWidth,
       scrollWidth = contentWidth,
@@ -33,12 +40,11 @@ local scrollView = widget.newScrollView
       listener = scrollListener,
       horizontalScrollDisabled = true,
       -- hideBackground = true
-      backgroundColor = { 0.45, 0.45, 0.45 }
+      backgroundColor = { 1, 1, 1 }
       -- isBounceEnabled = false
    }
    scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
-
 
 
 local fhd = io.open( path )
@@ -75,9 +81,24 @@ local function networkListener( event )
     end
 end
 
+
+
 local function onAddBtn()
    --titleText1.text = titleText1.text .. "1"
-   composer.gotoScene( "selectPin", {effect="fade", time=200})
+   -- composer.gotoScene( "selectPin", {effect="fade", time=200})
+
+      -- composer.gotoScene( "addSchedule", {effect="fade", time=200})
+
+   local options =
+   {
+   effect = "fade",
+   time = 400,
+   isModal = true,
+   params = {
+            }
+   }
+   composer.showOverlay( "addSchedule", options )
+
    return true -- indicates successful touch
 end
 
@@ -138,6 +159,7 @@ function refreshScreen()
       --if i % 4 == 0 then
       events[i] = display.newText( line, contentWidth * .5, verticalOffsetNew-200, native.systemFont ,contentHeight * .045)
       -- sceneGroup:insert(events[i])
+      events[i]:setTextColor( 0,0,0 )
       allControlsGroup:insert(events[i])
 
       print( line )
@@ -167,13 +189,14 @@ function scene:create( event )
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
-      width=display.contentWidth * .30, height=display.contentHeight * .1,
+      width=display.contentWidth / 3, 
+      height=display.contentHeight * .1,
       onRelease = onAddBtn
    }
-   addBtn.anchorX = .5
-   addBtn.anchorY = .5
-   addBtn.x = display.contentWidth * .25
-   addBtn.y = display.contentHeight * .83
+   addBtn.anchorX = 0
+   addBtn.anchorY = 0
+   addBtn.x = 0
+   addBtn.y = 0
    sceneGroup:insert(addBtn)
 
    clrBtn = widget.newButton{
@@ -182,13 +205,14 @@ function scene:create( event )
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
-      width=display.contentWidth * .30, height=display.contentHeight * .1,
+      width=display.contentWidth / 3, 
+      height=display.contentHeight * .1,
       onRelease = onClrBtn
    }
-   clrBtn.anchorX = .5
-   clrBtn.anchorY = .5
-   clrBtn.x = display.contentWidth * .5
-   clrBtn.y = display.contentHeight * .83
+   clrBtn.anchorX = 0
+   clrBtn.anchorY = 0
+   clrBtn.x = (display.contentWidth / 3) * 1
+   clrBtn.y = 0
    sceneGroup:insert(clrBtn)
    
    pushBtn = widget.newButton{
@@ -197,13 +221,14 @@ function scene:create( event )
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
-      width=display.contentWidth * .30, height=display.contentHeight * .1,
+      width=display.contentWidth / 3, 
+      height=display.contentHeight * .1,
       onRelease = onPushBtn
    }
-   pushBtn.anchorX = .5
-   pushBtn.anchorY = .5
-   pushBtn.x = display.contentWidth * .75
-   pushBtn.y = display.contentHeight * .83
+   pushBtn.anchorX = 0
+   pushBtn.anchorY = 0
+   pushBtn.x = (display.contentWidth / 3) * 2
+   pushBtn.y = 0
    sceneGroup:insert(pushBtn)
 
    -- Initialize the scene here.
