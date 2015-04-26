@@ -423,7 +423,7 @@ local function createCancelDoneButtons(sceneGroup)
       width=contentWidth / 2, 
       height=(contentHeight/9) ,
 
-      onEvent = function(event)
+      onRelease = function(event)
          -- composer.gotoScene( "schedule", {effect="fade", time=200})
          composer.hideOverlay("fade", 400)
        end
@@ -443,7 +443,7 @@ local function createCancelDoneButtons(sceneGroup)
       width=contentWidth/2, 
       height=(contentHeight/9) ,
 
-      onEvent = function(event)
+      onRelease = function(event)
          -- composer.gotoScene( "schedule", {effect="fade", time=200})
          composer.hideOverlay("fade", 400)
        end
