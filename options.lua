@@ -50,19 +50,93 @@ end
 
 -- "scene:create()"
 function scene:create( event )
-  sceneGroup = self.view	
+    local scrollView = widget.newScrollView   --allows us to scroll
+  {
+    top = 0,
+    left = 0,
+    width = contentWidth,
+    scrollWidth = contentWidth,
+    height = contentHeight - 100,
+    scrollHeight = contentHeight - 100,
+    listener = scrollListener,
+    horizontalScrollDisabled = true,
+    hideBackground = true
+    -- isBounceEnabled = false
+  }
+
+
+  sceneGroup = self.view
+
   titleText1 = display.newText( "passField", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
-  sceneGroup:insert(titleText1)
+    -- sceneGroup:insert(titleText1)
+    sceneGroup:insert(titleText1)
+
   titleText2 = display.newText( "ipField", contentWidth * .5, contentHeight*.2, native.systemFont ,contentHeight * .065)
-  sceneGroup:insert(titleText2)
+    -- sceneGroup:insert(titleText2)
+    scrollView:insert(titleText2)
+
   passwordField = native.newTextField( contentWidth*.5, contentHeight*.35, contentWidth*.75, contentHeight*.1 )
-  passwordField.text = "passwordField"
-  passwordField:addEventListener( "userInput", passwordFieldListener )
-  sceneGroup:insert(passwordField)
+    passwordField.text = "passwordField"
+    passwordField:addEventListener( "userInput", passwordFieldListener )
+    -- sceneGroup:insert(passwordField)
+    scrollView:insert(passwordField)
+
   ipField = native.newTextField( contentWidth*.5, contentHeight*.50, contentWidth*.75, contentHeight*.1 )
-  ipField.text = "ipField"
-  ipField:addEventListener( "userInput", ipFieldListener )
-  sceneGroup:insert(ipField)
+    ipField.text = "ipField"
+    ipField:addEventListener( "userInput", ipFieldListener )
+    -- sceneGroup:insert(ipField)
+      scrollView:insert(ipField)
+
+
+  -- scrollView:insert( allControlsGroup )
+  sceneGroup:insert(scrollView)
+
+  local theGroup = display.newGroup()
+  scrollView:insert(theGroup)
+
+  local theRectangle = display.newRect( 0, contentHeight * 0.6, contentWidth, contentHeight * .1 )
+  theRectangle.anchorX = 0
+  theRectangle.anchorY = 0
+  theGroup:insert(theRectangle)
+  local sliderOne = widget.newSlider{
+    top = contentHeight * 0.65,
+    left = 50,
+    width = 400,
+    value = 10,  -- Start slider at 10% (optional)
+    listener = sliderListener
+  }
+  theGroup:insert(sliderOne)
+
+  -- local textOne = native.newTextField( contentWidth*.5, contentHeight*.35, contentWidth*.75, contentHeight*.1 )
+
+
+
+local theRectangle = display.newRect( 0, contentHeight * 0.7, contentWidth, contentHeight * .1 )
+  theRectangle.anchorX = 0
+  theRectangle.anchorY = 0
+  scrollView:insert(theRectangle)
+  local sliderTwo = widget.newSlider{
+    top = contentHeight * 0.75,
+    left = 50,
+    width = 400,
+    value = 10,  -- Start slider at 10% (optional)
+    listener = sliderListener
+  }
+  scrollView:insert(sliderTwo)
+
+
+local theRectangle = display.newRect( 0, contentHeight * 0.8, contentWidth, contentHeight * .1 )
+  theRectangle.anchorX = 0
+  theRectangle.anchorY = 0
+  scrollView:insert(theRectangle)
+local sliderThree = widget.newSlider{
+    top = contentHeight * 0.85,
+    left = 50,
+    width = 400,
+    value = 10,  -- Start slider at 10% (optional)
+    listener = sliderListener
+  }
+  scrollView:insert(sliderThree)
    -- Initialize the scene here.	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
