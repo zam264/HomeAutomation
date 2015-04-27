@@ -339,8 +339,8 @@ local function onPushBtn()
    numLines = 0
    io.close(file)
    print(body)    
-   --params.body = body
-   --network.request( "http://cpsc.xthon.com/setSchedule.php", "POST", networkListener, params )
+   params.body = body
+   network.request( "http://cpsc.xthon.com/writeSchedule.php", "POST", networkListener, params )
    print("PUSH")
 end
 
