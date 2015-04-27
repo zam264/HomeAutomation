@@ -190,7 +190,7 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		params.body = body
 
 		local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-		network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+		network.request("http://http://192.168.0.100/getPin.php", "POST", networkListener, params)
 	return true
 	end
 end
@@ -224,7 +224,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 
 		local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, newStatus, togglePin) end 	--wrapper so parameters can be passed
 		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus, "POST", networkListener)
-		network.request("http://cpsc.xthon.com/setPin.php", "POST", networkListener, params)
+		network.request("http://192.168.0.100/setPin.php", "POST", networkListener, params)
 
 		return true
 	end
@@ -246,7 +246,7 @@ local function togglePin(aGroup, aButton, pinNumber)
 	params.body = body
 
 	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, togglePin) end 	--wrapper so parameters can be passed
-	network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+	network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
 	-- network.request("http://cpsc.xthon.com/getPin.php?pass=abcd4321&pinNum=" .. pinNumber, "POST", networkListener)
 
 end
@@ -261,7 +261,7 @@ local function initializeButtonStatus(aGroup, aButton, pinNumber)
 	params.body = body
 	local assumedStatus = 0
 	local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-			network.request("http://cpsc.xthon.com/getPin.php", "POST", networkListener, params)
+			network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
 end
 
 ---------------------------------------------NETWORK REQUEST STUFF --------------------------------------------------------------
