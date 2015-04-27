@@ -22,11 +22,6 @@ local allControlsGroup = display.newGroup()
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
-
-
-
-
-
 local scrollView = widget.newScrollView
    {
       top = display.contentHeight * .1,
@@ -169,7 +164,7 @@ local function writeSchedule(schedule)
          elseif(light == "Bedroom") then
             parsedLights[i] = "4"
          elseif(light == "Fan") then
-            parsedLights[i] = "F"
+            parsedLights[i] = "5"
          end
       end
 
@@ -178,9 +173,9 @@ local function writeSchedule(schedule)
    local parsedOnOff
    local isOnChosen = schedule.isOnChosen
       if(isOnChosen) then
-         parsedOnOff = "I"
+         parsedOnOff = "1"
       elseif(isOnChosen == false) then
-         parsedOnOff = "O"
+         parsedOnOff = "0"
       end
 
 
@@ -232,16 +227,11 @@ local function writeSchedule(schedule)
       for j = 1, numberLights, 1 do
          print(parsedLights[j] .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n")
          local file = io.open( path2, "a" )
+         print(scheduleString)
          file:write( scheduleString )
          io.close( file )
       end
    end
-   
-
-
-
-
-
 
 end
 
@@ -252,8 +242,6 @@ function scene:captureChosenSchedule(schedule)
    writeSchedule(schedule)
 
 end
-
-
 
 local fhd = io.open( path )
 if fhd then
@@ -288,8 +276,6 @@ local function networkListener( event )
         print ( "RESPONSE: " .. event.response )
     end
 end
-
-
 
 local function onAddBtn()
 
@@ -328,29 +314,35 @@ end
 local function onPushBtn()
    titleText1.text = "Event pushed to server"
    local params = {}
-   local body = "pass=abcd4321"
-
-   local file = io.open( path, "r" )     
+   local userID = system.getInfo( "deviceID" )
+   local body = "pass=abcd4321&userID=" .. userID
+   local numLines = 0  
+   local file = io.open( path, "r" )  
    i = 1
+   local bodySchedule = ""
    for line in file:lines() do
-      body = body .. "&pin" .. i .. "=" .. line:sub(1, 1)
-      body = body .. "&state" .. i .. "=" .. line:sub(2, 2)
-      body = body .. "&day" .. i .. "=" .. line:sub(3, 5)
-      body = body .. "&hour" .. i .. "=" .. line:sub(6, 7)
-      body = body .. "&min" .. i .. "=" .. line:sub(8, 9)
+      bodySchedule = bodySchedule .. "&pinOne" .. i .. "=" .. line:sub(1, 1)
+      bodySchedule = bodySchedule .. "&pinTwo" .. i .. "=" .. line:sub(2, 2)
+      bodySchedule = bodySchedule .. "&pinThree" .. i .. "=" .. line:sub(3, 3)
+      bodySchedule = bodySchedule .. "&pinFour" .. i .. "=" .. line:sub(4, 4)
+      bodySchedule = bodySchedule .. "&day" .. i .. "=" .. line:sub(5, 7)
+      bodySchedule = bodySchedule .. "&hour" .. i .. "=" .. line:sub(8, 9)
+      bodySchedule = bodySchedule .. "&min" .. i .. "=" .. line:sub(10, 11)
       print( line )
       i = i + 1
+      numLines = numLines + 1
    end
+   body = body .. "&numLines=" .. numLines 
+   body = body .. "&hvacTemp=70&hvacAway=50&hvacRange=2"
+   body = body .. bodySchedule
    i = 0
+   numLines = 0
    io.close(file)
    print(body)    
    --params.body = body
    --network.request( "http://cpsc.xthon.com/setSchedule.php", "POST", networkListener, params )
    print("PUSH")
 end
-
-
-
 
 -- "scene:create()"
 function scene:create( event )
