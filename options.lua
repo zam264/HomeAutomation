@@ -19,7 +19,13 @@ local function passwordFieldListener( event )
     elseif ( event.phase == "ended" or event.phase == "submitted" ) then
         -- do something with defaultField text
         print( event.target.text )
-        titleText1.text = event.target.text--debug
+
+        local path = system.pathForFile( "pass.txt", system.DocumentsDirectory )
+        local file = io.open( path, "w" )
+        file:write( event.target.text )
+        io.close( file )
+        file = nil
+
         --network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
     elseif ( event.phase == "editing" ) then
         print( event.newCharacters )
@@ -36,7 +42,11 @@ local function ipFieldListener( event )
     elseif ( event.phase == "ended" or event.phase == "submitted" ) then
         -- do something with defaultField text
         print( event.target.text )
-        titleText2.text = event.target.text--debug
+        local path = system.pathForFile( "ip.txt", system.DocumentsDirectory )
+        local file = io.open( path, "w" )
+        file:write( event.target.text )
+        io.close( file )
+        file = nil
         --network.request("http://cpsc.xthon.com/togglePin.php?pinNum=" .. pin, "POST", networkListener)
     elseif ( event.phase == "editing" ) then
         print( event.newCharacters )
@@ -67,22 +77,61 @@ function scene:create( event )
 
   sceneGroup = self.view
 
-  titleText1 = display.newText( "passField", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+  local path = system.pathForFile( "pass.txt", system.DocumentsDirectory )
+  local path2 = system.pathForFile( "ip.txt", system.DocumentsDirectory )
+  local fhd = io.open( path )
+
+  if fhd then
+     print( "File exists" )
+     fhd:close()
+  else
+      --fhd:close()
+      print( "File does not exist!" )
+
+      local file = io.open( path, "w" )
+      file:write( "" )
+      io.close( file )
+      file = nil
+  end
+  local file = io.open( path, "r" )
+  local savedData = file:read( "*a" )
+  io.close( file )
+  file = nil
+
+  local fhd = io.open( path2 )
+  if fhd then
+     print( "File exists" )
+     fhd:close()
+  else
+      --fhd:close()
+      print( "File does not exist!" )
+
+      local file = io.open( path2, "w" )
+      file:write( "" )
+      io.close( file )
+      file = nil
+  end
+  local file = io.open( path2, "r" )
+  local savedData2 = file:read( "*a" )
+  io.close( file )
+  file = nil
+
+  titleText1 = display.newText( "Password", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
     -- sceneGroup:insert(titleText1)
     sceneGroup:insert(titleText1)
 
-  titleText2 = display.newText( "ipField", contentWidth * .5, contentHeight*.2, native.systemFont ,contentHeight * .065)
+  titleText2 = display.newText( "IP Address", contentWidth * .5, contentHeight*.35, native.systemFont ,contentHeight * .065)
     -- sceneGroup:insert(titleText2)
     scrollView:insert(titleText2)
 
-  passwordField = native.newTextField( contentWidth*.5, contentHeight*.35, contentWidth*.75, contentHeight*.1 )
-    passwordField.text = "passwordField"
+  passwordField = native.newTextField( contentWidth*.5, contentHeight*.2, contentWidth*.75, contentHeight*.1 )
+    passwordField.text = savedData
     passwordField:addEventListener( "userInput", passwordFieldListener )
     -- sceneGroup:insert(passwordField)
     scrollView:insert(passwordField)
 
-  ipField = native.newTextField( contentWidth*.5, contentHeight*.50, contentWidth*.75, contentHeight*.1 )
-    ipField.text = "ipField"
+  ipField = native.newTextField( contentWidth*.5, contentHeight*.45, contentWidth*.75, contentHeight*.1 )
+    ipField.text = savedData2
     ipField:addEventListener( "userInput", ipFieldListener )
     -- sceneGroup:insert(ipField)
       scrollView:insert(ipField)
