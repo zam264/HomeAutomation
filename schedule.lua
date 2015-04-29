@@ -25,12 +25,12 @@ path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
 local function initInputOutput()
       local file = io.open( path, "w" )
-      file:write( " " )
+      file:write( "" )
       io.close( file )
       file = nil
 
       local file = io.open( path2, "w" )
-      file:write( " " )
+      file:write( "" )
       io.close( file )
       file = nil
 end
@@ -76,7 +76,7 @@ local function loadScheduleFromFile()
       isAmChosen = false,
       minuteChosen = -1
    }
-local lineString = file:read("*l")
+   local lineString = file:read("*l")
    for line in file:lines() do
        lineString = file:read("*l")
       -- print( lineString )
@@ -88,7 +88,7 @@ local lineString = file:read("*l")
          elseif( i == 2) then
             if(theToken == "true") then
                parameters.isOnChosen = true
-            else if(theToken == false) then
+            elseif(theToken == false) then
                parameters.isOnChosen = false
             end
          elseif(i == 3) then
@@ -100,6 +100,7 @@ local lineString = file:read("*l")
                parameters.isAmChosen = true
             elseif(theToken == "false") then
                parameters.isAmChosen = false
+            end
          elseif(i == 6) then
             parameters.minuteChosen = theToken
          end
@@ -226,23 +227,39 @@ end
 
 local function writeSchedule(schedule)
 
-   local parsedLights = {}
+   local parsedLights = ""
+   local parsedLightsTable = {   "0",
+                                 "0",
+                                 "0",
+                                 "0",
+                                 "0"
+                           }
    local lightsTable = schedule.lightsChosen
       local numberLights = table.maxn(lightsTable)
       for i = 1, numberLights, 1 do
          local light = lightsTable[i]
+
          if(light == "Living Room") then
-            parsedLights[i] = "1"
+            parsedLightsTable[1] = "1"
          elseif(light == "Kitchen") then
-            parsedLights[i] = "2"
+            -- parsedLights[i] = "2"
+            parsedLightsTable[2] = "1"
          elseif(light == "Mud-room") then
-            parsedLights[i] = "3"
+            -- parsedLights[i] = "3"
+            parsedLightsTable[3] = "1"
          elseif(light == "Bedroom") then
-            parsedLights[i] = "4"
+            -- parsedLights[i] = "4"
+            parsedLightsTable[4] = "1"
          elseif(light == "Fan") then
-            parsedLights[i] = "5"
+            -- parsedLights[i] = "5"
+            parsedLightsTable[5] = "1"
          end
       end
+
+   local numberLights = table.maxn(parsedLightsTable)
+   for i = 1, numberLights, 1 do
+      parsedLights = parsedLights .. parsedLightsTable[i]
+   end
 
    
 
@@ -301,18 +318,22 @@ local function writeSchedule(schedule)
    local serverFormat = io.open( path, "a" )
    local localFormat = io.open( path2, "a" )
    for i = 1, numberDays, 1 do
-      local numberLights = table.maxn(parsedLights)
+      local numberLights = table.maxn(lightsTable)
+
+      local serverString = parsedLights .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n"
+      serverFormat:write( serverString)
+
       for j = 1, numberLights, 1 do
-         local serverString = parsedLights[j] .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n"
-         serverFormat:write( serverString)
-         local localString = lightsTable[j] .. "," .. tostring(schedule.isOnChosen)  .. "," .. daysChosen[j] .. "," .. schedule.hourChosen .. "," .. tostring(schedule.isAmChosen) .. "," .. schedule.minuteChosen .. "\n"
+         local localString = lightsTable[j] .. "," .. tostring(schedule.isOnChosen)  .. "," .. daysChosen[i] .. "," .. schedule.hourChosen .. "," .. tostring(schedule.isAmChosen) .. "," .. schedule.minuteChosen .. "\n"
+         localFormat:write (localString)
+         print("WRITING OUR FILE")
          -- print(localString)
          
          -- localFormat:write(  )
       end
    end
    io.close( serverFormat )
-   -- io.close( localFormat )
+   io.close( localFormat )
    serverFormat = nil
    localFormat = nil
 end
