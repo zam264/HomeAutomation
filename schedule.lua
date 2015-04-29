@@ -22,6 +22,19 @@ local allControlsGroup = display.newGroup()
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
+
+local function initInputOutput()
+      local file = io.open( path, "w" )
+      file:write( " " )
+      io.close( file )
+      file = nil
+
+      local file = io.open( path2, "w" )
+      file:write( " " )
+      io.close( file )
+      file = nil
+end
+
 local scrollView = widget.newScrollView
    {
       top = display.contentHeight * .1,
@@ -36,6 +49,68 @@ local scrollView = widget.newScrollView
    }
    sceneGroup:insert(scrollView)
 
+
+function string:split( inSplitPattern, outResults )
+
+   if not outResults then
+      outResults = { }
+   end
+   local theStart = 1
+   local theSplitStart, theSplitEnd = string.find( self, inSplitPattern, theStart )
+   while theSplitStart do
+      table.insert( outResults, string.sub( self, theStart, theSplitStart-1 ) )
+      theStart = theSplitEnd + 1
+      theSplitStart, theSplitEnd = string.find( self, inSplitPattern, theStart )
+   end
+   table.insert( outResults, string.sub( self, theStart ) )
+   return outResults
+end
+
+local function loadScheduleFromFile()
+   local file = io.open( path2, "r" )
+   local parameters  = {
+      lightsChosen = {},
+      inOnChosen = false,
+      daysChosen = {},
+      hourChosen = -1,
+      isAmChosen = false,
+      minuteChosen = -1
+   }
+local lineString = file:read("*l")
+   for line in file:lines() do
+       lineString = file:read("*l")
+      -- print( lineString )
+
+      local theToken = lineString:split(",")
+      for i = 1, #theToken do
+         if(i == 1) then
+            table.insert(parameters.lightsChosen, theToken)
+         elseif( i == 2) then
+            if(theToken == "true") then
+               parameters.isOnChosen = true
+            else if(theToken == false) then
+               parameters.isOnChosen = false
+            end
+         elseif(i == 3) then
+            table.insert(parameters.daysChosen, theToken)
+         elseif(i ==4) then
+            parameters.hourChosen = theToken
+         elseif(i==5) then
+            if(theToken == "true") then
+               parameters.isAmChosen = true
+            elseif(theToken == "false") then
+               parameters.isAmChosen = false
+         elseif(i == 6) then
+            parameters.minuteChosen = theToken
+         end
+      end
+   end
+
+   io.close( file )
+   file = nil
+
+   table.insert(events, parameters)
+end
 
 local function showSchedule(schedule)
    allControlsGroup:removeSelf()
@@ -145,6 +220,7 @@ local function showSchedule(schedule)
    end
 
 
+
 end
 
 
@@ -222,23 +298,36 @@ local function writeSchedule(schedule)
    end
 
    local numberDays = table.maxn(parsedDays)
+   local serverFormat = io.open( path, "a" )
+   local localFormat = io.open( path2, "a" )
    for i = 1, numberDays, 1 do
       local numberLights = table.maxn(parsedLights)
       for j = 1, numberLights, 1 do
-         print(parsedLights[j] .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n")
-         local file = io.open( path2, "a" )
-         print(scheduleString)
-         file:write( scheduleString )
-         io.close( file )
+         local serverString = parsedLights[j] .. parsedOnOff .. parsedDays[i] .. parsedHour .. parsedMinute .. "\n"
+         serverFormat:write( serverString)
+         local localString = lightsTable[j] .. "," .. tostring(schedule.isOnChosen)  .. "," .. daysChosen[j] .. "," .. schedule.hourChosen .. "," .. tostring(schedule.isAmChosen) .. "," .. schedule.minuteChosen .. "\n"
+         -- print(localString)
+         
+         -- localFormat:write(  )
       end
    end
+   io.close( serverFormat )
+   -- io.close( localFormat )
+   serverFormat = nil
+   localFormat = nil
+end
 
+function clearFile()
+   initInputOutput()
+   events = {}
 end
 
 function scene:captureChosenSchedule(schedule)
    table.insert( events, schedule ) 
    print(table.maxn(events))
    showSchedule(schedule)
+   print("writing schedule")
+   loadScheduleFromFile()
    writeSchedule(schedule)
 
 end
@@ -299,12 +388,13 @@ local function onAddBtn()
 end
 
 local function onClrBtn()
-   local file = io.open( path, "w" )
-   file:write( "" )
-   io.close( file )
-   local file = io.open( path2, "w" )
-   file:write( "" )
-   io.close( file )
+   -- local file = io.open( path, "w" )
+   -- file:write( "" )
+   -- io.close( file )
+   -- local file = io.open( path2, "w" )
+   -- file:write( "" )
+   -- io.close( file )
+   clearFile()
    allControlsGroup:removeSelf()
    allControlsGroup = display.newGroup()
    events = {}
@@ -354,12 +444,12 @@ function scene:create( event )
    scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
 
-
+   initInputOutput()
 
 
    addBtn = widget.newButton{
-      label="Add",
-      fontSize = display.contentWidth * .05,
+      label="+",
+      fontSize = display.contentWidth * .08,
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
@@ -374,8 +464,8 @@ function scene:create( event )
    sceneGroup:insert(addBtn)
 
    clrBtn = widget.newButton{
-      label="Clear",
-      fontSize = display.contentWidth * .05,
+      label="-",
+      fontSize = display.contentWidth * .08,
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
@@ -390,7 +480,7 @@ function scene:create( event )
    sceneGroup:insert(clrBtn)
    
    pushBtn = widget.newButton{
-      label="Push",
+      label="↑",
       fontSize = display.contentWidth * .05,
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",

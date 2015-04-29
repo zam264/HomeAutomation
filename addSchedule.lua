@@ -36,19 +36,21 @@ background.anchorY = 0
 background.anchorX = 0
 
 
-local mainScroller = widget.newScrollView{
-         top = contentHeight*0.1,
-         left = 0,
-         width = contentWidth,
-         scrollWidth = contentWidth,
-         height = contentHeight,
-         scrollHeight = 0,
-         listener = scrollListener,
-         horizontalScrollDisabled = true,
-         verticalScrollDisabled = false,
-         backgroundColor = { 1, 1, 1 },
-         -- hideBackground = true
-      }
+-- local mainScroller = display.newGroup()
+
+-- local mainScroller = widget.newScrollView{
+--          top = contentHeight*0.1,
+--          left = 0,
+--          width = contentWidth,
+--          scrollWidth = contentWidth,
+--          height = contentHeight,
+--          scrollHeight = 0,
+--          listener = scrollListener,
+--          horizontalScrollDisabled = true,
+--          verticalScrollDisabled = false,
+--          backgroundColor = { 1, 1, 1 },
+--          -- hideBackground = true
+--       }
 
 local lightButtons = {}
 local lightNamesOptions = {
@@ -93,11 +95,11 @@ local minuteOptions = {}
 
 local allScrollers = {}
 local scrollersText = {
-   "light",
-   "",
-   "",
+   "lights",
+   "on/off",
+   "days",
    "hour",
-   "",
+   "am/pm",
    "minute",
 }
 
@@ -595,9 +597,9 @@ function scene:create( event )
    sceneGroup:insert(titleText)
 
 
-      sceneGroup:insert(mainScroller)
+      -- sceneGroup:insert(mainScroller)
 
-   createScrollers(mainScroller)
+   createScrollers(sceneGroup)
    createHoursAndMinutes(6)
    createAllButtons(handleButtonEvent)
    createCancelDoneButtons(sceneGroup)

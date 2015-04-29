@@ -119,6 +119,7 @@ local function verifyPinStatusNetworkListener(listener, aGroup, aButton, pinNumb
 	local actualStatus = tonumber(listener.response)
 	if(listener.isError) then
 			print("Network Error")
+			print(listener.response)
 			return false
 	else 
 
@@ -177,6 +178,7 @@ end
 local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, newStatus, togglePin)
 	if(listener.isError) then
 		print("Network Error")
+		print(listener.response)
 		return false
 	else
 		-- print("Pin status changed to (on/off): " .. newStatus .. listener.response)
@@ -190,7 +192,7 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		params.body = body
 
 		local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-		network.request("http://http://192.168.0.100/getPin.php", "POST", networkListener, params)
+		network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
 	return true
 	end
 end
@@ -206,6 +208,7 @@ end
 local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber, togglePin)
 	if(listener.isError) then
 		print("Network Error")
+		print(listener.response)
 		return false
 	else
 		-- print("2. Current status " .. listener.response)
