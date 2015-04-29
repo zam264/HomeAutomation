@@ -315,13 +315,13 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
               local position = 1
                for i = 1, tableSize, 1 do
                   if(theButton == buttonsGroup[i]) then
-                     table.remove(buttonsGroup, i)
                      position = i
-                     tempButton:removeSelf()
                      break
                   end
                end
-            -- tempButton:removeSelf()
+
+               tempButton:removeSelf()
+
             theLabel = tempButton.buttonText
             xPosition = tempButton.x
             canSelectMultiple = tempButton.canSelectMultiple
@@ -347,6 +347,7 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
             tempButton.isButtonSelected = false
             tempButton.canSelectMultiple = false
             currentScroller:insert(tempButton)
+            table.remove(buttonsGroup, i)
             table.insert(buttonsGroup, position, tempButton)
          end
       end
@@ -372,14 +373,14 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
    local position = 1
    for i = 1, tableSize, 1 do
       if(theButton == buttonsGroup[i]) then
-         table.remove(buttonsGroup, i)
+         
          position = i
-         theButton:removeSelf()
+         
          break
       end
    end
 
-
+theButton:removeSelf()
    
    theButton = widget.newButton{
       label = theLabel,
@@ -401,6 +402,7 @@ local function updateSwitchButtonState(theButton, eventHandler, currentScroller,
    theButton.isButtonSelected = newButtonSelectedState
    theButton.canSelectMultiple = canSelectMultiple
    currentScroller:insert(theButton)
+   table.remove(buttonsGroup, position)
    table.insert(buttonsGroup, position, theButton)
 
 
