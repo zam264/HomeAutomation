@@ -23,17 +23,6 @@ path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
 
-local function initInputOutput()
-      local file = io.open( path, "w" )
-      file:write( "" )
-      io.close( file )
-      file = nil
-
-      local file = io.open( path2, "w" )
-      file:write( "" )
-      io.close( file )
-      file = nil
-end
 
 local scrollView = widget.newScrollView
    {
@@ -77,35 +66,33 @@ local function loadScheduleFromFile()
       minuteChosen = -1
    }
    local lineString = file:read("*l")
-   for line in file:lines() do
-       lineString = file:read("*l")
-      -- print( lineString )
 
+   while(lineString ~= nil) do
       local theToken = lineString:split(",")
-      for i = 1, #theToken do
-         if(i == 1) then
-            table.insert(parameters.lightsChosen, theToken)
-         elseif( i == 2) then
-            if(theToken == "true") then
-               parameters.isOnChosen = true
-            elseif(theToken == false) then
-               parameters.isOnChosen = false
-            end
-         elseif(i == 3) then
-            table.insert(parameters.daysChosen, theToken)
-         elseif(i ==4) then
-            parameters.hourChosen = theToken
-         elseif(i==5) then
-            if(theToken == "true") then
-               parameters.isAmChosen = true
-            elseif(theToken == "false") then
-               parameters.isAmChosen = false
-            end
-         elseif(i == 6) then
-            parameters.minuteChosen = theToken
-         end
+
+      table.insert(parameters.lightsChosen, theToken[1])
+
+      if(theToken[2] == "true") then
+         parameters.isOnChosen = true
+      elseif(theToken[2] == "false") then
+         parameters.isOnChosen = false
       end
-   end
+
+      table.insert(parameters.daysChosen, theToken[3])
+
+      parameters.hourChosen = theToken[4]
+      print(parameters.hourChosen .. "\tIS THIS NULL<<<<<<<")
+
+      if(theToken[5] == "true") then
+         parameters.isAmChosen = true
+      elseif(theToken[5] == "false") then
+         parameters.isAmChosen = false
+      end
+
+      parameters.minuteChosen = theToken[6]
+
+      lineString = file:read("*l")
+end
 
    io.close( file )
    file = nil
@@ -113,7 +100,7 @@ local function loadScheduleFromFile()
    table.insert(events, parameters)
 end
 
-local function showSchedule(schedule)
+local function showSchedule()
    allControlsGroup:removeSelf()
    allControlsGroup = display.newGroup()
    scrollView:insert( allControlsGroup )
@@ -339,43 +326,59 @@ local function writeSchedule(schedule)
 end
 
 function clearFile()
-   initInputOutput()
+
+   local file = io.open( path, "w" )
+   file:write( "" )
+   io.close( file )
+
+
+   local file = io.open( path2, "w" )
+   file:write( "" )
+   io.close( file )
+
    events = {}
 end
 
 function scene:captureChosenSchedule(schedule)
    table.insert( events, schedule ) 
    print(table.maxn(events))
-   showSchedule(schedule)
-   print("writing schedule")
-   loadScheduleFromFile()
    writeSchedule(schedule)
+   -- loadScheduleFromFile()
+   showSchedule()
+   
+   
 
 end
 
-local fhd = io.open( path )
-if fhd then
-   print( "File exists" )
-   fhd:close()
-else
-   --fhd:close()
-   print( "File does not exist!" )
-   local file = io.open( path, "w" )
-   file:write( "" )
-   io.close( file )
-end
+
+local function initFiles()
+   local fhd = io.open( path )
+   if fhd then
+      print( "File exists" )
+      fhd:close()
+   else
+      --fhd:close()
+      print( "File does not exist!" )
+      local file = io.open( path, "w" )
+      file:write( "" )
+      io.close( file )
+   end
 
 
-local fhd = io.open( path2 )
-if fhd then
-   print( "File exists" )
-   fhd:close()
-else
-   --fhd:close()
-   print( "File does not exist!" )
-   local file = io.open( path2, "w" )
-   file:write( "" )
-   io.close( file )
+   local fhd = io.open( path2 )
+   if fhd then
+      print( "File exists" )
+      fhd:close()
+      print("LOADING FILE NIGGA")
+      loadScheduleFromFile()
+      showSchedule()
+   else
+      --fhd:close()
+      print( "File does not exist!" )
+      local file = io.open( path2, "w" )
+      file:write( "" )
+      io.close( file )
+   end
 end
 ---------------------------------------------------------------------------------
 local function networkListener( event )
@@ -465,7 +468,7 @@ function scene:create( event )
    scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
 
-   initInputOutput()
+   -- initInputOutput()
 
 
    addBtn = widget.newButton{
@@ -516,6 +519,7 @@ function scene:create( event )
    pushBtn.y = 0
    sceneGroup:insert(pushBtn)
 
+   initFiles()
    -- Initialize the scene here.
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
