@@ -16,20 +16,20 @@ local btnWidth = contentWidth * .45
 local btnHeight = contentHeight * .08
 local allControlsGroup = display.newGroup()
 
-
+local DEFAULT_SCENE = 1
 
 local function onControlsBtn()
-	composer.gotoScene( "controls", {effect="fade", time=200})
+	composer.gotoScene( "controls")
 
 	return true	-- indicates successful touch
 end
 local function onScheduleBtn()
-	composer.gotoScene( "schedule", {effect="fade", time=200})
+	composer.gotoScene( "schedule")
 
 	return true	-- indicates successful touch
 end
 local function onOptionsBtn()
-	composer.gotoScene( "options", {effect="fade", time=200})
+	composer.gotoScene( "options")
 
 	return true	-- indicates successful touch
 end
@@ -82,7 +82,7 @@ local function getApplianceNameTextXCoordinate(theNameText)
   	return -50
   end
 
-  local function getTabBarHeight()
+  function getTabBarHeight()
   	return (contentHeight / 9) 
   end
 
@@ -90,6 +90,22 @@ local function getApplianceNameTextXCoordinate(theNameText)
   	return (contentHeight / 9) * 8
   end
 
+local function getScrollerHeight()
+	return contentHeight * .911971831
+end
+
+local function getTabIconDimension()
+	return getTabBarHeight() * .792253521
+end 
+
+
+local function getTabbarSelectedFrameWidth()
+	return contentWidth * .0625
+end
+
+local function getTabbarSelectedFrameHeight()
+	return contentHeight * .105633803
+end
 
 local function networkListener(event)
 	-- native.setActivityIndicator( true )
@@ -290,8 +306,8 @@ function scene:create( event )
 		left = 0,
 		width = contentWidth,
 		scrollWidth = contentWidth,
-		height = contentHeight - 100,
-		scrollHeight = contentHeight - 100,
+		height = getScrollerHeight(),
+		scrollHeight = getScrollerHeight(),
 		listener = scrollListener,
 		horizontalScrollDisabled = true,
 		-- isBounceEnabled = false
@@ -337,42 +353,43 @@ function scene:create( event )
 
 	
 	
-local tabButtons = {
-    {
-        width = 100, 
-        height = 100,
-        defaultFile = "imgs/power_tabbar.png",
-        overFile = "imgs/power_tabbar_over.png",
-        --label = "Tab1",
-        id = "tab1",
-        --selected = true,
-        size = 16,
-        labelYOffset = -8,
-        onPress = onControlsBtn--handleTabBarEvent
-    },
-    {
-        width = 100, 
-        height = 100,
-        defaultFile = "imgs/scheduler_tabbar.png",
-        overFile = "imgs/scheduler_tabbar_over.png",
-        --label = "Tab2",
-        id = "tab2",
-        size = 16,
-        labelYOffset = -8,
-        onPress = onScheduleBtn--handleTabBarEvent
-    },
-    {
-        width = 100, 
-        height = 100,
-        defaultFile = "imgs/settings_tabbar.png",
-        overFile = "imgs/settings_tabbar_over.png",
-        --label = "Tab3",
-        id = "tab3",
-        size = 16,
-        labelYOffset = -8,
-        onPress = onOptionsBtn
-    }
-}
+local tabButtonActions = {
+						onControlsBtn,
+						onScheduleBtn,
+						onOptionsBtn
+						}
+
+local tabButtonImages = {
+						"imgs/power_tabbar.png",
+						"imgs/power_tabbar_over.png",
+						"imgs/scheduler_tabbar.png",
+						"imgs/scheduler_tabbar_over.png",
+						"imgs/settings_tabbar.png",
+        				"imgs/settings_tabbar_over.png"
+						}
+
+local tabButtons = {}
+local numberTabs = table.maxn(tabButtonActions)
+local counterOffset = 1
+for i = 1, numberTabs, 1 do
+	local tableButton = {
+			        width = getTabIconDimension(), 
+			        height = getTabIconDimension(),
+			        defaultFile = tabButtonImages[counterOffset],
+			        overFile = tabButtonImages[counterOffset + 1],
+			        --label = "Tab1",
+			        id = "tab" .. i,
+			        --selected = true,
+			        size = 16,
+			        labelYOffset = -8,
+			        onPress = tabButtonActions[i]--handleTabBarEvent
+				}
+				counterOffset = counterOffset + 2
+
+	table.insert(tabButtons, tableButton)
+end
+
+
 
 -- Create the widget
 local tabBar = widget.newTabBar
@@ -385,12 +402,12 @@ local tabBar = widget.newTabBar
     tabSelectedLeftFile = "imgs/tabBarBackground.png",
     tabSelectedRightFile = "imgs/tabBarBackground.png",
     tabSelectedMiddleFile = "imgs/tabBarBackground.png",
-    tabSelectedFrameWidth = 40,
-    tabSelectedFrameHeight = 120,
+    tabSelectedFrameWidth = getTabbarSelectedFrameWidth(),
+    tabSelectedFrameHeight = getTabbarSelectedFrameHeight(),
     buttons = tabButtons
 }
 
-tabBar:setSelected(1)
+tabBar:setSelected(DEFAULT_SCENE)
 
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end

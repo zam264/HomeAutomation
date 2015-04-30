@@ -6,12 +6,7 @@ local schedule = require ("schedule")
 -- All code outside of the listener functions will only be executed ONCE
 -- unless "composer.removeScene()" is called.
 ---------------------------------------------------------------------------------
-function scene:overlayBegan( event )
-   print( "The overlay scene is showing: " .. event.sceneName )
-   print( "We get custom params too! " .. event.params.sample_var )
-end
 
-scene:addEventListener( "overlayBegan" )
 
 local titleText
 local contentWidth = display.contentWidth
@@ -22,7 +17,6 @@ local newVerticalOffset = contentHeight * .2
 local btnWidth = 500
 local btnHeight = contentWidth * .2
 local controlButtonsGroup = display.newGroup()
--- display.setDefault( "background", 0, 0.371, 0.472 )
 
 local lightsChoice 
 
@@ -35,22 +29,6 @@ local background = display.newImageRect("imgs/button.png", contentWidth, content
 background.anchorY = 0
 background.anchorX = 0
 
-
--- local mainScroller = display.newGroup()
-
--- local mainScroller = widget.newScrollView{
---          top = contentHeight*0.1,
---          left = 0,
---          width = contentWidth,
---          scrollWidth = contentWidth,
---          height = contentHeight,
---          scrollHeight = 0,
---          listener = scrollListener,
---          horizontalScrollDisabled = true,
---          verticalScrollDisabled = false,
---          backgroundColor = { 1, 1, 1 },
---          -- hideBackground = true
---       }
 
 local lightButtons = {}
 local lightNamesOptions = {
@@ -541,7 +519,7 @@ local function createCancelDoneButtons(sceneGroup)
 
 
 
-         composer.hideOverlay("fade", 400)
+         composer.hideOverlay("slideDown", 400)
        end
    }
    doneButton.anchorX = 0
@@ -561,7 +539,7 @@ local function createCancelDoneButtons(sceneGroup)
 
       onRelease = function(event)
          -- composer.gotoScene( "schedule", {effect="fade", time=200})
-         composer.hideOverlay("fade", 400)
+         composer.hideOverlay("slideDown", 400)
        end
    }
    cancelButton.anchorX = 0
@@ -595,7 +573,7 @@ function scene:create( event )
    selections = event.params
    local sceneGroup = self.view
    sceneGroup:insert(background)
-   titleText = display.newText( "Select options", contentWidth * .5, contentHeight*.05, native.systemFont ,contentHeight * 0.05)   
+   titleText = display.newText( "Select options", contentWidth * .5, contentHeight*.5, native.systemFont ,contentHeight * 0.05)   
    sceneGroup:insert(titleText)
 
 

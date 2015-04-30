@@ -24,19 +24,7 @@ path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
 
 
 
-local scrollView = widget.newScrollView
-   {
-      top = display.contentHeight * .1,
-      left = 0,
-      width = contentWidth,
-      scrollWidth = contentWidth,
-      height = contentHeight - (400),
-      scrollHeight = 0,
-      listener = scrollListener,
-      horizontalScrollDisabled = true,
-      backgroundColor = { 1, 1, 1 }
-   }
-   sceneGroup:insert(scrollView)
+
 
 
 function string:split( inSplitPattern, outResults )
@@ -55,9 +43,107 @@ function string:split( inSplitPattern, outResults )
    return outResults
 end
 
+local function getToolbarButtonWidth()
+   return display.contentWidth / 3
+end
+
+local function getToolbarButtonHeight()
+   return display.contentHeight * 0.1
+end
+
+local function getToolbarButtonXPosition(buttonNumber)
+   return (display.contentWidth / 3) * buttonNumber
+end
+
+local function getButtonFontSize()
+   return display.contentWidth * 0.08
+end
+
+local function getScrollerTop()
+   return display.contentHeight * 0.1
+end
+
+local function getScrollerHeight()
+   return display.contentHeight - getToolbarButtonHeight() - getTabBarHeight()
+end
+
+local function getScheduledEventYPosition(eventNumber)
+   return display.contentHeight * 0.1 * (eventNumber - 1)
+end
+
+local function getScheduledEventHeight()
+   return display.contentHeight * 0.1
+end
+
+local function getEventBackgroundHeight()
+   return display.contentHeight * 0.1
+end
+
+local function getScheduledEventBackgroundYPosition(eventNumber)
+   return display.contentHeight * 0.1 * (eventNumber - 0)
+end
+
+local function getLightNameXPosition(lightName)
+   return (lightName.width / 2) + 40
+end
+
+local function getLightNameYPosition(eventNumber)
+   return (display.contentHeight * 0.1 * (eventNumber - 1)) + (display.contentHeight * 0.1 )
+end
+
+local function getDayNameXPosition(dayName)
+   return ((dayName.width / 2) + 40)
+end
+
+local function getDayNameYPosition(eventNumber, lightName)
+   return (display.contentHeight * 0.1 * (eventNumber - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+end
+
+local function getEventTextSize(background)
+   return background.height * 0.4
+end
+
+local function getTimeXPosition(timeText)
+   return (contentWidth - (timeText.width / 2))
+end
+
+local function getTimeYPosition(eventNumber, lightName)
+   return (display.contentHeight * 0.1 * (eventNumber - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+end
+
+local function getLightStateXPosition(dayName)
+   return (contentWidth - (dayName.width / 2))
+end
+
+local function getLightStateYPosition(eventNumber)
+   return (display.contentHeight * 0.1 * (eventNumber - 1)) + (display.contentHeight * 0.1 )
+end
+
+
+local scrollView = widget.newScrollView
+   {
+      top = getScrollerTop(),
+      left = 0,
+      width = contentWidth,
+      scrollWidth = contentWidth,
+      height = getScrollerHeight(),
+      scrollHeight = getScrollerHeight(),
+      listener = scrollListener,
+      horizontalScrollDisabled = true,
+      backgroundColor = { 1, 1, 1 }
+   }
+   sceneGroup:insert(scrollView)
+
+
+
 local function loadScheduleFromFile()
+   events = {}
    local file = io.open( path2, "r" )
-   local parameters  = {
+
+   local lineString = file:read("*l")
+
+   while(lineString ~= nil) do
+         local parameters  = {
       lightsChosen = {},
       inOnChosen = false,
       daysChosen = {},
@@ -65,9 +151,7 @@ local function loadScheduleFromFile()
       isAmChosen = false,
       minuteChosen = -1
    }
-   local lineString = file:read("*l")
 
-   while(lineString ~= nil) do
       local theToken = lineString:split(",")
 
       table.insert(parameters.lightsChosen, theToken[1])
@@ -81,7 +165,6 @@ local function loadScheduleFromFile()
       table.insert(parameters.daysChosen, theToken[3])
 
       parameters.hourChosen = theToken[4]
-      print(parameters.hourChosen .. "\tIS THIS NULL<<<<<<<")
 
       if(theToken[5] == "true") then
          parameters.isAmChosen = true
@@ -90,6 +173,7 @@ local function loadScheduleFromFile()
       end
 
       parameters.minuteChosen = theToken[6]
+      table.insert(events, parameters)
 
       lineString = file:read("*l")
 end
@@ -97,10 +181,11 @@ end
    io.close( file )
    file = nil
 
-   table.insert(events, parameters)
+   
 end
 
 local function showSchedule()
+   loadScheduleFromFile()
    allControlsGroup:removeSelf()
    allControlsGroup = display.newGroup()
    scrollView:insert( allControlsGroup )
@@ -118,38 +203,39 @@ local function showSchedule()
             local currentGroup = display.newGroup()
             buttonCounter = buttonCounter + 1
                currentGroup.width = contentWidth
-               currentGroup.height = display.contentHeight * 0.1
+               currentGroup.height = getScheduledEventHeight()
                currentGroup.anchorX = 0
                currentGroup.anchorY = 0
                currentGroup.x = 0
-               currentGroup.y = display.contentHeight * 0.1 * (buttonCounter - 1)
-               
+               currentGroup.y = getScheduledEventYPosition(buttonCounter)
+
 
             local background = display.newImage( "imgs/on_off_background.png", 0, 0 )
                background.width = contentWidth
-               background.height = display.contentHeight * 0.1
+               background.height = getEventBackgroundHeight()
                background.anchorX = 0
                background.anchorY = 0
                background.x = 0
-               background.y = display.contentHeight * 0.1 * (buttonCounter - 0)
+               background.y = getScheduledEventBackgroundYPosition(buttonCounter)
                -- background.y = 0
             currentGroup:insert(background)
 
-            local lightName = display.newText(lightsChosenTable[j], 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+            local lightName = display.newText(lightsChosenTable[j], 0, 0, "Helvetica Neue Thin", getEventTextSize(background))
                lightName:setTextColor( 0, 0, 0, 255 )
-               -- lightName.anchorY = 0
-               -- lightName.anchorX = 0
-               lightName.x = (lightName.width / 2) + 40
-               lightName.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 )
+               lightName.x = getLightNameXPosition(lightName)
+               lightName.y = getLightNameYPosition(buttonCounter)
             currentGroup:insert(lightName)
 
-            local dayName = display.newText(daysChosenTable[i], 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+            local dayName = display.newText(daysChosenTable[i], 0, 0, "Helvetica Neue Thin", getEventTextSize(background))
                dayName:setTextColor( 0, 0, 0, 255 )
                -- lightName.anchorY = 0
                -- lightName.anchorX = 0
-               dayName.x = ((dayName.width / 2) + 40)
-               dayName.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+               dayName.x = getDayNameXPosition(dayName)
+               dayName.y = getDayNameYPosition(buttonCounter, lightName)
             currentGroup:insert(dayName)
+
+
+
 
             local hourString
             if(tonumber(events[h].hourChosen) <= 9)then
@@ -171,15 +257,13 @@ local function showSchedule()
                amPmString = "pm"
             end
             local concatTime = hourString .. ":" .. minuteString .. amPmString
-            local theTime = display.newText(concatTime, 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+            local theTime = display.newText(concatTime, 0, 0, "Helvetica Neue Thin", getEventTextSize(background))
                theTime:setTextColor( 0, 0, 0, 255 )
                -- lightName.anchorY = 0
                -- lightName.anchorX = 0
-               theTime.x = (contentWidth - (theTime.width / 2))
-               theTime.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 ) + lightName.height
+               theTime.x = getTimeXPosition(theTime)
+               theTime.y = getTimeYPosition(buttonCounter, lightName)
             currentGroup:insert(theTime)
-
-
 
 
 
@@ -191,12 +275,15 @@ local function showSchedule()
             elseif(boolState == false) then
                stateString = "off"
             end
-            local lightState = display.newText(stateString, 0, 0, "Helvetica Neue Thin", background.height * 0.4)
+
+
+
+            local lightState = display.newText(stateString, 0, 0, "Helvetica Neue Thin", getEventTextSize(background))
                lightState:setTextColor( 0, 0, 0, 255 )
                -- lightName.anchorY = 0
                -- lightName.anchorX = 0
-               lightState.x = (contentWidth - (dayName.width / 2))
-               lightState.y = (display.contentHeight * 0.1 * (buttonCounter - 1)) + (display.contentHeight * 0.1 )
+               lightState.x = getLightStateXPosition(dayName)
+               lightState.y = getLightStateYPosition(buttonCounter)
             currentGroup:insert(lightState)
 
 
@@ -340,12 +427,11 @@ function clearFile()
 end
 
 function scene:captureChosenSchedule(schedule)
-   table.insert( events, schedule ) 
-   print(table.maxn(events))
+   -- table.insert( events, schedule ) 
+   -- print(table.maxn(events))
    writeSchedule(schedule)
    -- loadScheduleFromFile()
    showSchedule()
-   
    
 
 end
@@ -369,8 +455,7 @@ local function initFiles()
    if fhd then
       print( "File exists" )
       fhd:close()
-      print("LOADING FILE NIGGA")
-      loadScheduleFromFile()
+      -- loadScheduleFromFile()
       showSchedule()
    else
       --fhd:close()
@@ -394,7 +479,7 @@ local function onAddBtn()
 
    local options =
    {
-   effect = "fade",
+   effect = "fromBottom",
    time = 400,
    isModal = true,
    params = {
@@ -468,60 +553,46 @@ function scene:create( event )
    scrollView:insert( allControlsGroup )
    sceneGroup:insert(scrollView)
 
-   -- initInputOutput()
-
-
-   addBtn = widget.newButton{
-      label="+",
-      fontSize = display.contentWidth * .08,
-      labelColor = { default={255}, over={128} },
-      defaultFile="imgs/button.png",
-      overFile="imgs/button_over.png",
-      width=display.contentWidth / 3, 
-      height=display.contentHeight * .1,
-      onRelease = onAddBtn
-   }
-   addBtn.anchorX = 0
-   addBtn.anchorY = 0
-   addBtn.x = 0
-   addBtn.y = 0
-   sceneGroup:insert(addBtn)
-
-   clrBtn = widget.newButton{
-      label="-",
-      fontSize = display.contentWidth * .08,
-      labelColor = { default={255}, over={128} },
-      defaultFile="imgs/button.png",
-      overFile="imgs/button_over.png",
-      width=display.contentWidth / 3, 
-      height=display.contentHeight * .1,
-      onRelease = onClrBtn
-   }
-   clrBtn.anchorX = 0
-   clrBtn.anchorY = 0
-   clrBtn.x = (display.contentWidth / 3) * 1
-   clrBtn.y = 0
-   sceneGroup:insert(clrBtn)
    
-   pushBtn = widget.newButton{
-      label="↑",
-      fontSize = display.contentWidth * .05,
+
+
+local toolbarSymbols = {
+   "+",
+   "-",
+   "↑"
+}
+
+local toolbarActions = {
+                        onAddBtn,
+                        onClrBtn,
+                        onPushBtn
+                     }
+
+local toolbarButtons = {}
+
+local numberButtons = table.maxn(toolbarSymbols)
+for i = 1, numberButtons, 1 do
+   tempButton = widget.newButton{
+      label=toolbarSymbols[i],
+      fontSize = getButtonFontSize(),
       labelColor = { default={255}, over={128} },
       defaultFile="imgs/button.png",
       overFile="imgs/button_over.png",
-      width=display.contentWidth / 3, 
-      height=display.contentHeight * .1,
-      onRelease = onPushBtn
+      width=getToolbarButtonWidth(), 
+      height=getToolbarButtonHeight(),
+      onRelease = toolbarActions[i]
    }
-   pushBtn.anchorX = 0
-   pushBtn.anchorY = 0
-   pushBtn.x = (display.contentWidth / 3) * 2
-   pushBtn.y = 0
-   sceneGroup:insert(pushBtn)
+   tempButton.anchorX = 0
+   tempButton.anchorY = 0
+   tempButton.x = getToolbarButtonXPosition(i-1)
+   tempButton.y = 0
+   sceneGroup:insert(tempButton)
+   table.insert(toolbarButtons, tempButton)
+
+end
 
    initFiles()
-   -- Initialize the scene here.
-   -- Example: add display objects to "sceneGroup", add touch listeners, etc.
+
 end
 
 -- "scene:show()"
@@ -530,7 +601,8 @@ function scene:show( event )
    local phase = event.phase
    if ( phase == "will" ) then
       titleText1.isVisible = true
-      addBtn.isVisible = true
+      -- addBtn.isVisible = true
+      sceneGroup.isVisible = true
       showSchedule()
       -- refreshScreen()
       allControlsGroup.isVisible = true
@@ -554,7 +626,8 @@ function scene:hide( event )
 
    if ( phase == "will" ) then
          titleText1.isVisible = false
-         addBtn.isVisible = false
+         -- addBtn.isVisible = false
+         sceneGroup.isVisible = false
          allControlsGroup.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
