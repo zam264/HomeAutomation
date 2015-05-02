@@ -141,7 +141,7 @@ function scene:create( event )
       file = nil
   end
   local file = io.open( path, "r" )
-  local savedData = file:read( "*a" )
+  local password = file:read( "*a" )
   io.close( file )
   file = nil
 
@@ -159,7 +159,7 @@ function scene:create( event )
       file = nil
   end
   local file = io.open( path2, "r" )
-  local savedData2 = file:read( "*a" )
+   ipAddress = file:read( "*a" )
   io.close( file )
   file = nil
 
@@ -173,13 +173,13 @@ function scene:create( event )
     scrollView:insert(titleText2)
 
   passwordField = native.newTextField( contentWidth*.5, contentHeight*.2, contentWidth*.75, contentHeight*.1 )
-    passwordField.text = savedData
+    passwordField.text = password
     passwordField:addEventListener( "userInput", passwordFieldListener )
     -- sceneGroup:insert(passwordField)
     scrollView:insert(passwordField)
 
   ipField = native.newTextField( contentWidth*.5, contentHeight*.45, contentWidth*.75, contentHeight*.1 )
-    ipField.text = savedData2
+    ipField.text = ipAddress
     ipField:addEventListener( "userInput", ipFieldListener )
     -- sceneGroup:insert(ipField)
       scrollView:insert(ipField)

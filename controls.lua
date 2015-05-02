@@ -208,7 +208,7 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 		params.body = body
 
 		local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-		network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
+		network.request(ipAddress .. "/getPin.php", "POST", networkListener, params)
 	return true
 	end
 end
@@ -243,7 +243,7 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 
 		local networkListener = function(returnEvent) return setPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, newStatus, togglePin) end 	--wrapper so parameters can be passed
 		-- network.request("http://cpsc.xthon.com/setPin.php?pass=abcd4321&pinNum=" .. pinNumber .. "&state" .. newStatus, "POST", networkListener)
-		network.request("http://192.168.0.100/setPin.php", "POST", networkListener, params)
+		network.request(ipAddress .. "/setPin.php", "POST", networkListener, params)
 
 		return true
 	end
@@ -265,7 +265,7 @@ local function togglePin(aGroup, aButton, pinNumber)
 	params.body = body
 
 	local networkListener = function(returnEvent) return askPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, togglePin) end 	--wrapper so parameters can be passed
-	network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
+	network.request(ipAddress .. "/getPin.php", "POST", networkListener, params)
 	-- network.request("http://cpsc.xthon.com/getPin.php?pass=abcd4321&pinNum=" .. pinNumber, "POST", networkListener)
 
 end
@@ -280,13 +280,50 @@ local function initializeButtonStatus(aGroup, aButton, pinNumber)
 	params.body = body
 	local assumedStatus = 0
 	local networkListener = function(returnEvent) return verifyPinStatusNetworkListener(returnEvent, aGroup, aButton, pinNumber, assumedStatus, togglePin) end 	--wrapper so parameters can be passed
-			network.request("http://192.168.0.100/getPin.php", "POST", networkListener, params)
+			network.request(ipAddress .. "/getPin.php", "POST", networkListener, params)
 end
 
 ---------------------------------------------NETWORK REQUEST STUFF --------------------------------------------------------------
 
 
 function scene:create( event )
+	--get our ip and password variables set
+   local path1 = system.pathForFile( "pass.txt", system.DocumentsDirectory )
+   local path2 = system.pathForFile( "ip.txt", system.DocumentsDirectory )
+
+   local fhd = io.open( path1 )
+   if fhd then
+      print( "File exists" )
+      fhd:close()
+   else
+      print( "File does not exist!" )
+      local file = io.open( path1, "w" )
+      file:write( "" )
+      io.close( file )
+      file = nil
+   end
+
+   local file = io.open( path1, "r" )
+    password = file:read( "*a" )
+   io.close( file )
+   file = nil
+
+   local fhd = io.open( path2 )
+   if fhd then
+      print( "File exists" )
+      fhd:close()
+   else
+      print( "File does not exist!" )
+      local file = io.open( path2, "w" )
+      file:write( "" )
+      io.close( file )
+      file = nil
+   end
+
+   local file = io.open( path2, "r" )
+    ipAddress = file:read( "*a" )
+   io.close( file )
+   file = nil
 
 	sceneGroup = self.view	
 	titleText1 = display.newText( "Controls", contentWidth * .5, contentHeight*.04, getApplianceNameFont() ,contentHeight * .065)

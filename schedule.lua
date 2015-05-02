@@ -514,7 +514,8 @@ local function onPushBtn()
    titleText1.text = "Event pushed to server"
    local params = {}
    local userID = system.getInfo( "deviceID" )
-   local body = "pass=abcd4321&userID=" .. userID
+
+   local body = "pass=" .. password .. "&userID=" .. userID
    local numLines = 0  
    local file = io.open( path, "r" )  
    i = 1
@@ -539,7 +540,7 @@ local function onPushBtn()
    io.close(file)
    print(body)    
    params.body = body
-   network.request( "http://cpsc.xthon.com/writeSchedule.php", "POST", networkListener, params )
+   network.request( ipAddress .. "/writeSchedule.php", "POST", networkListener, params )
    print("PUSH")
 end
 
