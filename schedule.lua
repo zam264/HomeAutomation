@@ -21,7 +21,7 @@ local allControlsGroup = display.newGroup()
 -- allControlsGroup.anchorY = 0
 path = system.pathForFile( "tasks.txt", system.DocumentsDirectory )
 path2 = system.pathForFile( "taskList.txt", system.DocumentsDirectory )
-
+temperatureSettingsFile = system.pathForFile("temp.txt", system.DocumentsDirectory)
 
 
 
@@ -532,8 +532,41 @@ local function onPushBtn()
       i = i + 1
       numLines = numLines + 1
    end
+
+     local fhd = io.open(temperatureSettingsFile)
+     if fhd then
+       print("Temperature file exists")
+       fhd:close()
+     else
+       print("Temperature file does not exist!")
+       local tempsFile = io.open(temperatureSettingsFile, "w")
+       tempsFile:write("")
+       io.close(tempsFile)
+       tempsFile = nil
+     end
+     local tempsFile = io.open(temperatureSettingsFile, "r")
+     local temperatures = tempsFile:read("*a")
+     print("STRING LENGTH")
+     print(string.len(temperatures))
+     local hvacTemp
+     local hvacAway
+     local hvacRange
+     if(string.len(temperatures) == 5) then
+       hvacTemp = string.sub( temperatures, 1, 2 )
+       hvacAway = string.sub( temperatures, 3, 4 )
+       hvacRange = string.sub( temperatures, 5, 5 )
+       io.close(tempsFile)
+       tempsFile = nil
+     else
+       hvacTemp  = "65"
+       hvacAway = "55"
+       hvacRange = "2"
+   end
+
+
    body = body .. "&numLines=" .. numLines 
-   body = body .. "&hvacTemp=70&hvacAway=50&hvacRange=2"
+   -- body = body .. "&hvacTemp=70&hvacAway=50&hvacRange=2"
+   body = body .. "&hvacTemp=" .. hvacTemp  .. "&hvacAway=" .. hvacAway .. "&hvacRange=" .. hvacRange
    body = body .. bodySchedule
    i = 0
    numLines = 0

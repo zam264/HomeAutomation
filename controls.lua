@@ -203,7 +203,7 @@ local function setPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 
 		local assumedStatus = newStatus
 
-		local body = "pass=abcd4321&pinNum=" .. pinNumber
+		local body = "pass=" .. password .. "&pinNum=" .. pinNumber
 		local params = {}
 		params.body = body
 
@@ -237,7 +237,8 @@ local function askPinStatusNetworkListener(listener, aGroup, aButton, pinNumber,
 
 		-- print("3. New status " .. newStatus)
 
-		local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state=" .. newStatus
+		-- local body = "pass=abcd4321&pinNum=" .. pinNumber .. "&state=" .. newStatus
+		local body = "pass=" .. password .. "&pinNum=" .. pinNumber .. "&state=" .. newStatus
 		local params = {}
 		params.body = body
 
@@ -260,7 +261,8 @@ end
 local function togglePin(aGroup, aButton, pinNumber)
 	-- print('\n\n\n1. Toggling pin# ' .. pinNumber)
 	
-	local body = "pass=abcd4321&pinNum=" .. pinNumber
+	-- local body = "pass=abcd4321&pinNum=" .. pinNumber
+	local body = "pass=" .. password .. "&pinNum=" .. pinNumber
 	local params = {}
 	params.body = body
 
@@ -336,7 +338,6 @@ function scene:create( event )
 			"Bedroom"
 		}
 
-	
 	local scrollView = widget.newScrollView		--allows us to scroll
 	{
 		top = 0,
