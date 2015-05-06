@@ -5,30 +5,36 @@ local widget = require "widget"		-- include Corona's "widget" library
 -- All code outside of the listener functions will only be executed ONCE
 -- unless "composer.removeScene()" is called.
 ---------------------------------------------------------------------------------
-display.setDefault( "background", .25 )
+display.setDefault( "background", 1, 1, 1)
 -- local forward references should go here
 local titleText1, titleText2, controlsBtn, scheduleBtn, passwordField, ipField
 local contentWidth = display.contentWidth
 local contentHeight = display.contentHeight
 local test = "testText"--debug
 
+local temperatureTable = {}
+
 local sliderMinimumTemperature = 40
 local sliderMaximumTemperatures = 100
-
+local scrollView 
 local sliderValueGroup = display.newGroup()
 sceneGroup:insert(sliderValueGroup)
 
-local function calculatePercentToTemperature(percent)
+local function getScrollerHeight()
+  return contentHeight * .911971831
+end
+
+local function calculatePercentToTemperature(percent, min, max)
   local maximumPercentage = 100
-    local offset = sliderMinimumTemperature
-  local multiplier = maximumPercentage / (sliderMaximumTemperatures - offset)
+  local offset = min
+  local multiplier = maximumPercentage / (max - offset)
   return math.floor(((percent) / multiplier) + offset)
 end
 
-local function calculateTemperatureToPercent(temperature)
+local function calculateTemperatureToPercent(temperature, min, max)
   local maximumPercentage = 100
-    local offset = sliderMinimumTemperature
-  local multiplier = maximumPercentage / (sliderMaximumTemperatures - offset)
+  local offset = min
+  local multiplier = maximumPercentage / (max - offset)
   return math.floor(multiplier * (temperature - offset))
 end
 
@@ -78,48 +84,62 @@ local function ipFieldListener( event )
     end
 end
 
-local function sliderListener(event)
-  local percentValue = event.value
-  local realValue = tostring(calculatePercentToTemperature(percentValue))
-  -- sliderValueGroup:removeSelf()
-  -- sliderValueGroup = display.newGroup()
-
-local options = 
-{
-    --parent = textGroup,
-    text=realValue,
-    x = 100,
-    y = 600,
-    width = 128,     --required for multi-line and alignment
-    font = native.systemFontBold,   
-    fontSize = 18,
-    align = "right"  --new alignment parameter
-}
-
-
-  local temperature = display.newText(options)
+local function drawSliderTemperatures(sliderNumber)
   sliderValueGroup:removeSelf()
   sliderValueGroup = display.newGroup()
-  sliderValueGroup:insert(temperature)
-
+  for i = 1, table.maxn(temperatureTable), 1 do
+    local options = 
+    {
+        --parent = textGroup,
+        text=temperatureTable[i],
+        x = contentWidth*0.8,
+        y = contentHeight * (0.45 + (0.15 * (i-1))),
+        width = 128,     --required for multi-line and alignment
+        font = native.systemFont,   
+        fontSize = 40,
+        align = "right",  --new alignment parameter
+        anchorX = 0,
+        anchorY = 0
+    }
+    local temperature = display.newText(options)
+    temperature:setFillColor(.6,.6,.6)
+    sliderValueGroup:insert(temperature)
+    scrollView:insert(sliderValueGroup)
+  end
 end
+
+
+local function sliderListener(event, min, max, sliderNumber)
+  local percentValue = event.value
+  local numericValue = calculatePercentToTemperature(percentValue, min, max)
+  temperatureTable[sliderNumber] = numericValue
+  -- local realValue = tostring(numericValue)
+  -- sliderValueGroup:removeSelf()
+  -- sliderValueGroup = display.newGroup()
+    drawSliderTemperatures(sliderNumber)
+  end
+
+
+
+
 ---------------------------------------------------------------------------------
 
 -- "scene:create()"
 function scene:create( event )
-    local scrollView = widget.newScrollView   --allows us to scroll
+    scrollView = widget.newScrollView   --allows us to scroll
   {
     top = 0,
     left = 0,
     width = contentWidth,
     scrollWidth = contentWidth,
-    height = contentHeight - 100,
-    scrollHeight = contentHeight - 100,
+    height = getScrollerHeight(),
+    scrollHeight = getScrollerHeight(),
     listener = scrollListener,
     horizontalScrollDisabled = true,
     hideBackground = true
     -- isBounceEnabled = false
   }
+
 
 
   sceneGroup = self.view
@@ -163,23 +183,38 @@ function scene:create( event )
   io.close( file )
   file = nil
 
-  titleText1 = display.newText( "Password", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .065)
+  local inputRectangle = display.newRect( contentWidth * 0.07, contentHeight * 0.07, (contentWidth * .82), contentHeight * .25 )
+  inputRectangle:setFillColor(.9,.9,.9)
+  inputRectangle.anchorX = 0
+  inputRectangle.anchorY = 0
+  scrollView:insert(inputRectangle)
+  titleText1 = display.newText( "System Access", contentWidth * .5, contentHeight*.1, native.systemFont ,contentHeight * .03)
+  titleText1:setTextColor(0,0,0)
+  -- titleText1.anchorX = 0
+  -- titleText1.anchorY = 0
     -- sceneGroup:insert(titleText1)
     -- sceneGroup:insert(titleText1)
     scrollView:insert(titleText1)
 
-  titleText2 = display.newText( "IP Address", contentWidth * .5, contentHeight*.35, native.systemFont ,contentHeight * .065)
+  -- titleText2 = display.newText( "IP Address", contentWidth * .5, contentHeight*.3, native.systemFont ,contentHeight * .065)
+  -- titleText2:setTextColor(0,0,0)
     -- sceneGroup:insert(titleText2)
-    scrollView:insert(titleText2)
+  -- scrollView:insert(titleText2)
 
-  passwordField = native.newTextField( contentWidth*.5, contentHeight*.2, contentWidth*.75, contentHeight*.1 )
+  passwordField = native.newTextField( contentWidth*.1, contentHeight*.13, contentWidth*.75, contentHeight*.07 )
+    passwordField.anchorX = 0
+    passwordField.anchorY = 0
     passwordField.text = password
     passwordField:addEventListener( "userInput", passwordFieldListener )
+    passwordField.placeholder = "password"
     -- sceneGroup:insert(passwordField)
     scrollView:insert(passwordField)
 
-  ipField = native.newTextField( contentWidth*.5, contentHeight*.45, contentWidth*.75, contentHeight*.1 )
+  ipField = native.newTextField( contentWidth*.1, contentHeight*.22, contentWidth*.75, contentHeight*.07 )
+    ipField.anchorX = 0
+    ipField.anchorY = 0
     ipField.text = ipAddress
+    ipField.placeholder = "http://10.1.237.71"
     ipField:addEventListener( "userInput", ipFieldListener )
     -- sceneGroup:insert(ipField)
       scrollView:insert(ipField)
@@ -195,58 +230,72 @@ function scene:create( event )
   -- theRectangle.anchorX = 0
   -- theRectangle.anchorY = 0
   -- sliderGroup:insert(theRectangle)
+  local sliderOneText = display.newText( "At-Home Temperature", contentWidth * .1, contentHeight*.4, native.systemFont ,contentHeight * 0.03)
+  sliderOneText:setTextColor(0,0,0)
+  sliderOneText.anchorX = 0
+  sliderOneText.anchorY = 0
+    scrollView:insert(sliderOneText)
   local sliderOne = widget.newSlider{
-    top = contentHeight * 0.65,
-    left = 50,
-    height = 400,
-    orientation="vertical",
-    value = calculateTemperatureToPercent(60),  -- Start slider at 10% (optional)
-    listener = sliderListener
+    top = contentHeight * 0.45,
+    left = contentWidth * 0.1,
+    width = contentWidth * 0.6,
+    orientation="horizontal",
+    value = calculateTemperatureToPercent(65, 40, 90),  -- Start slider at 10% (optional)
+    listener = function(event) sliderListener(event, 40, 90, 1) end
   }
   sliderGroup:insert(sliderOne)
+  temperatureTable[1] = "65"
 
   -- local textOne = native.newTextField( contentWidth*.5, contentHeight*.35, contentWidth*.75, contentHeight*.1 )
 
 
 
--- local theRectangle = display.newRect( 0, contentHeight * 0.7, contentWidth, contentHeight * .1 )
---   theRectangle.anchorX = 0
---   theRectangle.anchorY = 0
-  -- sliderGroup:insert(theRectangle)
+ local sliderTwoText = display.newText( "Away Temperature", contentWidth * .1, contentHeight*.55, native.systemFont ,contentHeight * 0.03)
+  sliderTwoText:setTextColor(0,0,0)
+  sliderTwoText.anchorX = 0
+  sliderTwoText.anchorY = 0
+    scrollView:insert(sliderTwoText)
   local sliderTwo = widget.newSlider{
-    top = contentHeight * 0.65,
-    left = 150,
-    height = 400,
-        orientation="vertical",
-    value =  calculateTemperatureToPercent(65),  -- Start slider at 10% (optional)
-    listener = sliderListener
+    top = contentHeight * 0.6,
+    left = contentWidth * 0.1,
+    width = contentWidth * 0.6,
+        orientation="horizontal",
+    value =  calculateTemperatureToPercent(55, 40, 90),  -- Start slider at 10% (optional)
+    listener = function(event) sliderListener(event, 40, 90, 2) end
   }
   sliderGroup:insert(sliderTwo)
+  temperatureTable[2] = "55"
 
 
--- local theRectangle = display.newRect( 0, contentHeight * 0.8, contentWidth, contentHeight * .1 )
---   theRectangle.anchorX = 0
---   theRectangle.anchorY = 0
-  -- sliderGroup:insert(theRectangle)
+ local sliderThreeText = display.newText( "Flucuation Delta", contentWidth * .1, contentHeight*.7, native.systemFont ,contentHeight * 0.03)
+  sliderThreeText:setTextColor(0,0,0)
+  sliderThreeText.anchorX = 0
+  sliderThreeText.anchorY = 0
+    scrollView:insert(sliderThreeText)
 local sliderThree = widget.newSlider{
-    top = contentHeight * 0.65,
-    left = 250,
-    height = 400,
-        orientation="vertical",
-    value = calculateTemperatureToPercent(70),  -- Start slider at 10% (optional)
-    listener = sliderListener
+    top = contentHeight * 0.75,
+    left = contentWidth * 0.1,
+    width = contentWidth * 0.6,
+        orientation="horizontal",
+    value = calculateTemperatureToPercent(2, 0, 9),  -- Start slider at 10% (optional)
+    listener = function(event) sliderListener(event, 0, 9, 3) end
   }
   sliderGroup:insert(sliderThree)
+  temperatureTable[3] = "2"
+
+  drawSliderTemperatures()
    -- Initialize the scene here.	
    -- Example: add display objects to "sceneGroup", add touch listeners, etc.
 end
 
 -- "scene:show()"
 function scene:show( event )
+    display.setDefault( "background", 1, 1, 1 )
     local sceneGroup = self.view
     local phase = event.phase
     if ( phase == "will" ) then
-  	titleText1.isVisible = true
+  	-- titleText1.isVisible = true
+    scrollView.isVisible = true
     passwordField.isVisible = true
     ipField.isVisible = true
       -- Called when the scene is still off screen (but is about to come on screen).
@@ -262,9 +311,10 @@ function scene:hide( event )
     local sceneGroup = self.view
     local phase = event.phase
     if ( phase == "will" ) then
-   		titleText1.isVisible = false
+   		-- titleText1.isVisible = false
       passwordField.isVisible = false
       ipField.isVisible = false
+      scrollView.isVisible = false
       -- Called when the scene is on screen (but is about to go off screen).
       -- Insert code here to "pause" the scene.
       -- Example: stop timers, stop animation, stop audio, etc.
@@ -276,8 +326,10 @@ end
 -- "scene:destroy()"
 function scene:destroy( event )
    local sceneGroup = self.view
-	titleText1:removeSelf()
-	titleText1 = nil
+	-- titleText1:removeSelf()
+	-- titleText1 = nil
+  scrollView:removeSelf()
+  scrollView = nil
   passwordField:removeSelf()
   passwordField = nil
   ipField:removeSelf()
